@@ -273,6 +273,7 @@ def create_rgb_scatter_plots(r_channel, g_channel, b_channel):
     """
     Create scatter plots showing relationships between RGB channels.
     Uses density-based alpha values to highlight concentrations.
+    Colors points by their actual RGB values.
 
     Args:
         r_channel: Red channel array
@@ -293,18 +294,20 @@ def create_rgb_scatter_plots(r_channel, g_channel, b_channel):
     g_sample = g_flat[sample_idx]
     b_sample = b_flat[sample_idx]
 
+    # Normalize RGB values to [0, 1] for color mapping
+    rgb_colors = np.column_stack([r_sample, g_sample, b_sample]) / 255.0
+
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
     # Calculate density-based alpha for Red vs Green using histogram binning
     h_rg, xedges, yedges = np.histogram2d(r_sample, g_sample, bins=20)
-    # Map each point to its bin and get the count
     x_indices = np.digitize(r_sample, xedges) - 1
     y_indices = np.digitize(g_sample, yedges) - 1
     counts_rg = h_rg[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
     alpha_rg = np.clip(np.sqrt(counts_rg) / np.sqrt(counts_rg.max()) * 0.7 + 0.1, 0.1, 0.8)
 
-    # Red vs Green
-    axes[0].scatter(r_sample, g_sample, alpha=alpha_rg, s=10, c='purple')
+    # Red vs Green - color by actual RGB values
+    axes[0].scatter(r_sample, g_sample, alpha=alpha_rg, s=10, c=rgb_colors)
     axes[0].set_xlabel('Red')
     axes[0].set_ylabel('Green')
     axes[0].set_title('Red vs Green')
@@ -319,8 +322,8 @@ def create_rgb_scatter_plots(r_channel, g_channel, b_channel):
     counts_rb = h_rb[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
     alpha_rb = np.clip(np.sqrt(counts_rb) / np.sqrt(counts_rb.max()) * 0.7 + 0.1, 0.1, 0.8)
 
-    # Red vs Blue
-    axes[1].scatter(r_sample, b_sample, alpha=alpha_rb, s=10, c='orange')
+    # Red vs Blue - color by actual RGB values
+    axes[1].scatter(r_sample, b_sample, alpha=alpha_rb, s=10, c=rgb_colors)
     axes[1].set_xlabel('Red')
     axes[1].set_ylabel('Blue')
     axes[1].set_title('Red vs Blue')
@@ -335,8 +338,8 @@ def create_rgb_scatter_plots(r_channel, g_channel, b_channel):
     counts_gb = h_gb[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
     alpha_gb = np.clip(np.sqrt(counts_gb) / np.sqrt(counts_gb.max()) * 0.7 + 0.1, 0.1, 0.8)
 
-    # Green vs Blue
-    axes[2].scatter(g_sample, b_sample, alpha=alpha_gb, s=10, c='teal')
+    # Green vs Blue - color by actual RGB values
+    axes[2].scatter(g_sample, b_sample, alpha=alpha_gb, s=10, c=rgb_colors)
     axes[2].set_xlabel('Green')
     axes[2].set_ylabel('Blue')
     axes[2].set_title('Green vs Blue')
@@ -348,15 +351,17 @@ def create_rgb_scatter_plots(r_channel, g_channel, b_channel):
     return fig
 
 
-def create_hcl_scatter_plots(hue, chroma, luminance):
+def create_hcl_scatter_plots(hue, chroma, luminance, rgb_image=None):
     """
     Create scatter plots showing relationships between HCL dimensions.
     Uses density-based alpha values to highlight concentrations.
+    Colors points by their actual RGB values from the image.
 
     Args:
         hue: Hue array (0-360 degrees)
         chroma: Chroma array
         luminance: Luminance array (0-100)
+        rgb_image: Original RGB image (optional, for coloring points)
 
     Returns:
         Matplotlib figure
@@ -372,6 +377,12 @@ def create_hcl_scatter_plots(hue, chroma, luminance):
     chroma_sample = chroma_flat[sample_idx]
     luminance_sample = luminance_flat[sample_idx]
 
+    # Get RGB colors if image is provided
+    rgb_colors = None
+    if rgb_image is not None:
+        rgb_flat = rgb_image.reshape(-1, 3)
+        rgb_colors = rgb_flat[sample_idx] / 255.0  # Normalize to [0, 1]
+
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
     # Hue vs Chroma - calculate density-based alpha using histogram binning
@@ -381,14 +392,19 @@ def create_hcl_scatter_plots(hue, chroma, luminance):
     counts_hc = h_hc[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
     alpha_hc = np.clip(np.sqrt(counts_hc) / np.sqrt(counts_hc.max()) * 0.7 + 0.1, 0.1, 0.8)
 
-    scatter1 = axes[0].scatter(hue_sample, chroma_sample, alpha=alpha_hc, s=10,
-                               c=hue_sample, cmap='hsv', vmin=0, vmax=360)
+    # Hue vs Chroma - color by actual RGB values if available
+    if rgb_colors is not None:
+        axes[0].scatter(hue_sample, chroma_sample, alpha=alpha_hc, s=10, c=rgb_colors)
+    else:
+        scatter1 = axes[0].scatter(hue_sample, chroma_sample, alpha=alpha_hc, s=10,
+                                   c=hue_sample, cmap='hsv', vmin=0, vmax=360)
+        plt.colorbar(scatter1, ax=axes[0])
+
     axes[0].set_xlabel('Hue (degrees)')
     axes[0].set_ylabel('Chroma')
     axes[0].set_title('Hue vs Chroma')
     axes[0].set_xlim(0, 360)
     axes[0].grid(True, alpha=0.3)
-    plt.colorbar(scatter1, ax=axes[0])
 
     # Hue vs Luminance - calculate density-based alpha using histogram binning
     h_hl, xedges, yedges = np.histogram2d(hue_sample, luminance_sample, bins=20)
@@ -397,14 +413,19 @@ def create_hcl_scatter_plots(hue, chroma, luminance):
     counts_hl = h_hl[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
     alpha_hl = np.clip(np.sqrt(counts_hl) / np.sqrt(counts_hl.max()) * 0.7 + 0.1, 0.1, 0.8)
 
-    scatter2 = axes[1].scatter(hue_sample, luminance_sample, alpha=alpha_hl, s=10,
-                               c=hue_sample, cmap='hsv', vmin=0, vmax=360)
+    # Hue vs Luminance - color by actual RGB values if available
+    if rgb_colors is not None:
+        axes[1].scatter(hue_sample, luminance_sample, alpha=alpha_hl, s=10, c=rgb_colors)
+    else:
+        scatter2 = axes[1].scatter(hue_sample, luminance_sample, alpha=alpha_hl, s=10,
+                                   c=hue_sample, cmap='hsv', vmin=0, vmax=360)
+        plt.colorbar(scatter2, ax=axes[1])
+
     axes[1].set_xlabel('Hue (degrees)')
     axes[1].set_ylabel('Luminance (L*)')
     axes[1].set_title('Hue vs Luminance')
     axes[1].set_xlim(0, 360)
     axes[1].grid(True, alpha=0.3)
-    plt.colorbar(scatter2, ax=axes[1])
 
     # Chroma vs Luminance - calculate density-based alpha using histogram binning
     h_cl, xedges, yedges = np.histogram2d(chroma_sample, luminance_sample, bins=20)
@@ -413,13 +434,18 @@ def create_hcl_scatter_plots(hue, chroma, luminance):
     counts_cl = h_cl[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
     alpha_cl = np.clip(np.sqrt(counts_cl) / np.sqrt(counts_cl.max()) * 0.7 + 0.1, 0.1, 0.8)
 
-    scatter3 = axes[2].scatter(chroma_sample, luminance_sample, alpha=alpha_cl, s=10,
-                               c=luminance_sample, cmap='gray')
+    # Chroma vs Luminance - color by actual RGB values if available
+    if rgb_colors is not None:
+        axes[2].scatter(chroma_sample, luminance_sample, alpha=alpha_cl, s=10, c=rgb_colors)
+    else:
+        scatter3 = axes[2].scatter(chroma_sample, luminance_sample, alpha=alpha_cl, s=10,
+                                   c=luminance_sample, cmap='gray')
+        plt.colorbar(scatter3, ax=axes[2])
+
     axes[2].set_xlabel('Chroma')
     axes[2].set_ylabel('Luminance (L*)')
     axes[2].set_title('Chroma vs Luminance')
     axes[2].grid(True, alpha=0.3)
-    plt.colorbar(scatter3, ax=axes[2])
 
     plt.tight_layout()
     return fig

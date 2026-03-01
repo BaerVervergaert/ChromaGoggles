@@ -154,7 +154,7 @@ def main():
 
             # Show scatter plots
             st.subheader("HCL Dimension Relationships")
-            fig_hcl_scatter = create_hcl_scatter_plots(hue, chroma, luminance)
+            fig_hcl_scatter = create_hcl_scatter_plots(hue, chroma, luminance, analyzer.original_image)
             st.pyplot(fig_hcl_scatter)
             plt.close()
 
