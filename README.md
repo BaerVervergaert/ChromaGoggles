@@ -182,4 +182,3 @@ BaerVervergaert
 - Color space conversion algorithms based on CIE standards
 - Built with Streamlit for rapid prototyping and deployment
 
-

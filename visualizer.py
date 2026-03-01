@@ -304,7 +304,7 @@ def create_rgb_scatter_plots(r_channel, g_channel, b_channel):
     alpha_rg = np.clip(np.sqrt(counts_rg) / np.sqrt(counts_rg.max()) * 0.7 + 0.1, 0.1, 0.8)
 
     # Red vs Green
-    axes[0].scatter(r_sample, g_sample, alpha=alpha_rg, s=10, c='orange')
+    axes[0].scatter(r_sample, g_sample, alpha=alpha_rg, s=10, c='purple')
     axes[0].set_xlabel('Red')
     axes[0].set_ylabel('Green')
     axes[0].set_title('Red vs Green')
@@ -320,7 +320,7 @@ def create_rgb_scatter_plots(r_channel, g_channel, b_channel):
     alpha_rb = np.clip(np.sqrt(counts_rb) / np.sqrt(counts_rb.max()) * 0.7 + 0.1, 0.1, 0.8)
 
     # Red vs Blue
-    axes[1].scatter(r_sample, b_sample, alpha=alpha_rb, s=10, c='purple')
+    axes[1].scatter(r_sample, b_sample, alpha=alpha_rb, s=10, c='orange')
     axes[1].set_xlabel('Red')
     axes[1].set_ylabel('Blue')
     axes[1].set_title('Red vs Blue')
