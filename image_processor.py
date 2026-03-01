@@ -71,30 +71,24 @@ class ImageAnalyzer:
     def get_hcl(self):
         """
         Extract Hue, Chroma, and Luminance values.
-        Uses the LCh (CIELCh) color space.
+        Uses the LCh (CIELCh) color space (cylindrical representation of LAB).
 
         Returns:
             Tuple of (hue, chroma, luminance) arrays
         """
-        # Convert RGB to LAB first, then to LCH
+        # Convert RGB to LAB first
         rgb_normalized = self.original_image / 255.0
         lab_image = color.rgb2lab(rgb_normalized)
 
-        # Convert LAB to LCH
-        # L stays the same (luminance)
-        # C (chroma) = sqrt(a^2 + b^2)
-        # H (hue) = atan2(b, a)
+        # Convert LAB to LCH using scikit-image
+        lch_image = color.lab2lch(lab_image)
 
-        luminance = lab_image[:, :, 0]
-        a = lab_image[:, :, 1]
-        b = lab_image[:, :, 2]
-
-        chroma = np.sqrt(a**2 + b**2)
-        hue = np.arctan2(b, a)
-        # Convert hue from radians to degrees
+        # Extract individual channels
+        luminance = lch_image[:, :, 0]
+        chroma = lch_image[:, :, 1]
+        hue = lch_image[:, :, 2]
+        # Hue is returned in radians [0, 2π], convert to degrees [0, 360]
         hue = np.degrees(hue)
-        # Make hue positive (0-360)
-        hue = (hue + 360) % 360
 
         return hue, chroma, luminance
 

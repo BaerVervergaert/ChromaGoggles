@@ -88,7 +88,7 @@ def create_hcl_comparison(hue, chroma, luminance):
     plt.colorbar(im1, ax=axes[0], fraction=0.046)
 
     # Chroma
-    im2 = axes[1].imshow(chroma, cmap='viridis')
+    im2 = axes[1].imshow(chroma, cmap='gray')
     axes[1].set_title('Chroma')
     axes[1].axis('off')
     plt.colorbar(im2, ax=axes[1], fraction=0.046)
@@ -264,6 +264,162 @@ def create_colorspace_comparison(original, hsv, lab, ycbcr):
     axes[1, 3].imshow(ycbcr[:, :, 0], cmap='gray')
     axes[1, 3].set_title('YCbCr - Luma (Y)')
     axes[1, 3].axis('off')
+
+    plt.tight_layout()
+    return fig
+
+
+def create_rgb_scatter_plots(r_channel, g_channel, b_channel):
+    """
+    Create scatter plots showing relationships between RGB channels.
+    Uses density-based alpha values to highlight concentrations.
+
+    Args:
+        r_channel: Red channel array
+        g_channel: Green channel array
+        b_channel: Blue channel array
+
+    Returns:
+        Matplotlib figure
+    """
+    # Flatten arrays and sample for clarity (don't plot all pixels)
+    r_flat = r_channel.flatten()
+    g_flat = g_channel.flatten()
+    b_flat = b_channel.flatten()
+
+    # Sample pixels for better performance (every 10th pixel)
+    sample_idx = np.arange(0, len(r_flat), 10)
+    r_sample = r_flat[sample_idx]
+    g_sample = g_flat[sample_idx]
+    b_sample = b_flat[sample_idx]
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+    # Calculate density-based alpha for Red vs Green using histogram binning
+    h_rg, xedges, yedges = np.histogram2d(r_sample, g_sample, bins=20)
+    # Map each point to its bin and get the count
+    x_indices = np.digitize(r_sample, xedges) - 1
+    y_indices = np.digitize(g_sample, yedges) - 1
+    counts_rg = h_rg[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
+    alpha_rg = np.clip(np.sqrt(counts_rg) / np.sqrt(counts_rg.max()) * 0.7 + 0.1, 0.1, 0.8)
+
+    # Red vs Green
+    axes[0].scatter(r_sample, g_sample, alpha=alpha_rg, s=10, c='orange')
+    axes[0].set_xlabel('Red')
+    axes[0].set_ylabel('Green')
+    axes[0].set_title('Red vs Green')
+    axes[0].set_xlim(0, 255)
+    axes[0].set_ylim(0, 255)
+    axes[0].grid(True, alpha=0.3)
+
+    # Calculate density-based alpha for Red vs Blue using histogram binning
+    h_rb, xedges, yedges = np.histogram2d(r_sample, b_sample, bins=20)
+    x_indices = np.digitize(r_sample, xedges) - 1
+    y_indices = np.digitize(b_sample, yedges) - 1
+    counts_rb = h_rb[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
+    alpha_rb = np.clip(np.sqrt(counts_rb) / np.sqrt(counts_rb.max()) * 0.7 + 0.1, 0.1, 0.8)
+
+    # Red vs Blue
+    axes[1].scatter(r_sample, b_sample, alpha=alpha_rb, s=10, c='purple')
+    axes[1].set_xlabel('Red')
+    axes[1].set_ylabel('Blue')
+    axes[1].set_title('Red vs Blue')
+    axes[1].set_xlim(0, 255)
+    axes[1].set_ylim(0, 255)
+    axes[1].grid(True, alpha=0.3)
+
+    # Calculate density-based alpha for Green vs Blue using histogram binning
+    h_gb, xedges, yedges = np.histogram2d(g_sample, b_sample, bins=20)
+    x_indices = np.digitize(g_sample, xedges) - 1
+    y_indices = np.digitize(b_sample, yedges) - 1
+    counts_gb = h_gb[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
+    alpha_gb = np.clip(np.sqrt(counts_gb) / np.sqrt(counts_gb.max()) * 0.7 + 0.1, 0.1, 0.8)
+
+    # Green vs Blue
+    axes[2].scatter(g_sample, b_sample, alpha=alpha_gb, s=10, c='teal')
+    axes[2].set_xlabel('Green')
+    axes[2].set_ylabel('Blue')
+    axes[2].set_title('Green vs Blue')
+    axes[2].set_xlim(0, 255)
+    axes[2].set_ylim(0, 255)
+    axes[2].grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    return fig
+
+
+def create_hcl_scatter_plots(hue, chroma, luminance):
+    """
+    Create scatter plots showing relationships between HCL dimensions.
+    Uses density-based alpha values to highlight concentrations.
+
+    Args:
+        hue: Hue array (0-360 degrees)
+        chroma: Chroma array
+        luminance: Luminance array (0-100)
+
+    Returns:
+        Matplotlib figure
+    """
+    # Flatten arrays and sample for clarity (don't plot all pixels)
+    hue_flat = hue.flatten()
+    chroma_flat = chroma.flatten()
+    luminance_flat = luminance.flatten()
+
+    # Sample pixels for better performance (every 10th pixel)
+    sample_idx = np.arange(0, len(hue_flat), 10)
+    hue_sample = hue_flat[sample_idx]
+    chroma_sample = chroma_flat[sample_idx]
+    luminance_sample = luminance_flat[sample_idx]
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+    # Hue vs Chroma - calculate density-based alpha using histogram binning
+    h_hc, xedges, yedges = np.histogram2d(hue_sample, chroma_sample, bins=20)
+    x_indices = np.digitize(hue_sample, xedges) - 1
+    y_indices = np.digitize(chroma_sample, yedges) - 1
+    counts_hc = h_hc[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
+    alpha_hc = np.clip(np.sqrt(counts_hc) / np.sqrt(counts_hc.max()) * 0.7 + 0.1, 0.1, 0.8)
+
+    scatter1 = axes[0].scatter(hue_sample, chroma_sample, alpha=alpha_hc, s=10,
+                               c=hue_sample, cmap='hsv', vmin=0, vmax=360)
+    axes[0].set_xlabel('Hue (degrees)')
+    axes[0].set_ylabel('Chroma')
+    axes[0].set_title('Hue vs Chroma')
+    axes[0].set_xlim(0, 360)
+    axes[0].grid(True, alpha=0.3)
+    plt.colorbar(scatter1, ax=axes[0])
+
+    # Hue vs Luminance - calculate density-based alpha using histogram binning
+    h_hl, xedges, yedges = np.histogram2d(hue_sample, luminance_sample, bins=20)
+    x_indices = np.digitize(hue_sample, xedges) - 1
+    y_indices = np.digitize(luminance_sample, yedges) - 1
+    counts_hl = h_hl[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
+    alpha_hl = np.clip(np.sqrt(counts_hl) / np.sqrt(counts_hl.max()) * 0.7 + 0.1, 0.1, 0.8)
+
+    scatter2 = axes[1].scatter(hue_sample, luminance_sample, alpha=alpha_hl, s=10,
+                               c=hue_sample, cmap='hsv', vmin=0, vmax=360)
+    axes[1].set_xlabel('Hue (degrees)')
+    axes[1].set_ylabel('Luminance (L*)')
+    axes[1].set_title('Hue vs Luminance')
+    axes[1].set_xlim(0, 360)
+    axes[1].grid(True, alpha=0.3)
+    plt.colorbar(scatter2, ax=axes[1])
+
+    # Chroma vs Luminance - calculate density-based alpha using histogram binning
+    h_cl, xedges, yedges = np.histogram2d(chroma_sample, luminance_sample, bins=20)
+    x_indices = np.digitize(chroma_sample, xedges) - 1
+    y_indices = np.digitize(luminance_sample, yedges) - 1
+    counts_cl = h_cl[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
+    alpha_cl = np.clip(np.sqrt(counts_cl) / np.sqrt(counts_cl.max()) * 0.7 + 0.1, 0.1, 0.8)
+
+    scatter3 = axes[2].scatter(chroma_sample, luminance_sample, alpha=alpha_cl, s=10,
+                               c=luminance_sample, cmap='gray')
+    axes[2].set_xlabel('Chroma')
+    axes[2].set_ylabel('Luminance (L*)')
+    axes[2].set_title('Chroma vs Luminance')
+    axes[2].grid(True, alpha=0.3)
+    plt.colorbar(scatter3, ax=axes[2])
 
     plt.tight_layout()
     return fig

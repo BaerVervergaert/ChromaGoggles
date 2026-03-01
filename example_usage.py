@@ -10,7 +10,9 @@ from visualizer import (
     create_channel_comparison,
     create_hcl_comparison,
     create_density_plots,
-    create_colorspace_comparison
+    create_colorspace_comparison,
+    create_rgb_scatter_plots,
+    create_hcl_scatter_plots,
 )
 
 
@@ -65,6 +67,18 @@ def analyze_image(image_path):
     fig3.savefig('output_density_plots.png', dpi=150, bbox_inches='tight')
     print("✓ Saved: output_density_plots.png")
     plt.close(fig3)
+
+    # RGB scatter plots
+    fig5 = create_rgb_scatter_plots(r_channel, g_channel, b_channel)
+    fig5.savefig('output_rgb_scatter.png', dpi=150, bbox_inches='tight')
+    print("✓ Saved: output_rgb_scatter.png")
+    plt.close(fig5)
+
+    # HCL scatter plots
+    fig6 = create_hcl_scatter_plots(hue, chroma, luminance)
+    fig6.savefig('output_hcl_scatter.png', dpi=150, bbox_inches='tight')
+    print("✓ Saved: output_hcl_scatter.png")
+    plt.close(fig6)
 
     # Color space comparison
     fig4 = create_colorspace_comparison(analyzer.original_image, hsv, lab, ycbcr)

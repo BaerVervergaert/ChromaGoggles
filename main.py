@@ -16,6 +16,8 @@ from visualizer import (
     create_density_plots,
     create_rgb_density_plots,
     create_colorspace_comparison,
+    create_rgb_scatter_plots,
+    create_hcl_scatter_plots,
 )
 
 
@@ -98,6 +100,12 @@ def main():
             st.pyplot(fig_rgb_density)
             plt.close()
 
+            # Show scatter plots
+            st.subheader("RGB Channel Relationships")
+            fig_rgb_scatter = create_rgb_scatter_plots(r_channel, g_channel, b_channel)
+            st.pyplot(fig_rgb_scatter)
+            plt.close()
+
             # Show statistics
             st.subheader("Channel Statistics")
             col1, col2, col3 = st.columns(3)
@@ -142,6 +150,12 @@ def main():
             # Show density plots
             fig_density = create_density_plots(hue, chroma, luminance)
             st.pyplot(fig_density)
+            plt.close()
+
+            # Show scatter plots
+            st.subheader("HCL Dimension Relationships")
+            fig_hcl_scatter = create_hcl_scatter_plots(hue, chroma, luminance)
+            st.pyplot(fig_hcl_scatter)
             plt.close()
 
             # Show statistics
