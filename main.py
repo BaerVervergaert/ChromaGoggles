@@ -207,11 +207,11 @@ def main():
             axes[0].set_title('L* (Lightness)')
             axes[0].axis('off')
 
-            axes[1].imshow(luv[:, :, 1], cmap='RdYlGn')
-            axes[1].set_title('U* component')
+            axes[1].imshow(luv[:, :, 1], cmap='RdYlGn_r')
+            axes[1].set_title('U* component (green-red)')
             axes[1].axis('off')
 
-            axes[2].imshow(luv[:, :, 2], cmap='YlGnBu')
+            axes[2].imshow(luv[:, :, 2], cmap='YlGnBu_r')
             axes[2].set_title('V* component')
             axes[2].axis('off')
 

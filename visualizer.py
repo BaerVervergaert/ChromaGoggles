@@ -252,11 +252,11 @@ def create_colorspace_comparison(original, hsv, lab, ycbcr):
     axes[1, 0].set_title('LAB - Lightness')
     axes[1, 0].axis('off')
 
-    axes[1, 1].imshow(lab[:, :, 1], cmap='RdYlGn')
+    axes[1, 1].imshow(lab[:, :, 1], cmap='RdYlGn_r')
     axes[1, 1].set_title('LAB - A (green-red)')
     axes[1, 1].axis('off')
 
-    axes[1, 2].imshow(lab[:, :, 2], cmap='YlGnBu')
+    axes[1, 2].imshow(lab[:, :, 2], cmap='YlGnBu_r')
     axes[1, 2].set_title('LAB - B (blue-yellow)')
     axes[1, 2].axis('off')
 
