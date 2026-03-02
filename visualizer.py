@@ -517,16 +517,6 @@ def create_xyz_visualization(xyz_image):
     y_component = xyz_image[:, :, 1]
     z_component = xyz_image[:, :, 2]
 
-    # # Get value ranges for proper normalization
-    # x_min, x_max = np.nanmin(x_component), np.nanmax(x_component)
-    # y_min, y_max = np.nanmin(y_component), np.nanmax(y_component)
-    # z_min, z_max = np.nanmin(z_component), np.nanmax(z_component)
-    #
-    # # Normalize components to [0, 1] for visualization
-    # x_norm = (x_component - x_min) / (x_max - x_min) if x_max > x_min else x_component
-    # y_norm = (y_component - y_min) / (y_max - y_min) if y_max > y_min else y_component
-    # z_norm = (z_component - z_min) / (z_max - z_min) if z_max > z_min else z_component
-    #
     # X component - Red-like (warm colors: black to red to yellow)
     im_x = axes[0].imshow(x_component, cmap='hot', vmin=0, vmax=1)
     axes[0].set_title(f'X component (Red-like)')
