@@ -81,21 +81,24 @@ def create_hcl_comparison(hue, chroma, luminance):
     """
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
-    # Hue - use HSV colormap for better representation
+    # Hue - use HSV colormap for better representation, scale 0-360
+    # TODO: HSV is the wrong colormap for hue from LCh. The angles in LCh have different meaning than the hue in HSV. Consider using a custom colormap or a circular representation for better visualization.
     im1 = axes[0].imshow(hue, cmap='hsv', vmin=0, vmax=360)
     axes[0].set_title('Hue (0-360°)')
     axes[0].axis('off')
     plt.colorbar(im1, ax=axes[0], fraction=0.046)
 
-    # Chroma
-    im2 = axes[1].imshow(chroma, cmap='gray')
+    # Chroma - scale to actual data range
+    # TODO: Determine the correct range of chroma values for better visualization (currently using min/max of data)
+    chroma_min, chroma_max = np.nanmin(chroma), np.nanmax(chroma)
+    im2 = axes[1].imshow(chroma, cmap='gray', vmin=chroma_min, vmax=chroma_max)
     axes[1].set_title('Chroma')
     axes[1].axis('off')
     plt.colorbar(im2, ax=axes[1], fraction=0.046)
 
-    # Luminance
-    im3 = axes[2].imshow(luminance, cmap='gray')
-    axes[2].set_title('Luminance (L*)')
+    # Luminance - scale 0-100 for L* values
+    im3 = axes[2].imshow(luminance, cmap='gray', vmin=0, vmax=100)
+    axes[2].set_title('Luminance (L* 0-100)')
     axes[2].axis('off')
     plt.colorbar(im3, ax=axes[2], fraction=0.046)
 
@@ -235,34 +238,34 @@ def create_colorspace_comparison(original, hsv, lab, ycbcr):
     axes[0, 0].axis('off')
 
     # HSV channels
-    axes[0, 1].imshow(hsv[:, :, 0], cmap='hsv')
-    axes[0, 1].set_title('HSV - Hue')
+    axes[0, 1].imshow(hsv[:, :, 0], cmap='hsv', vmin=0, vmax=180)
+    axes[0, 1].set_title('HSV - Hue (0-180)')
     axes[0, 1].axis('off')
 
-    axes[0, 2].imshow(hsv[:, :, 1], cmap='gray')
-    axes[0, 2].set_title('HSV - Saturation')
+    axes[0, 2].imshow(hsv[:, :, 1], cmap='gray', vmin=0, vmax=255)
+    axes[0, 2].set_title('HSV - Saturation (0-255)')
     axes[0, 2].axis('off')
 
-    axes[0, 3].imshow(hsv[:, :, 2], cmap='gray')
-    axes[0, 3].set_title('HSV - Value')
+    axes[0, 3].imshow(hsv[:, :, 2], cmap='gray', vmin=0, vmax=255)
+    axes[0, 3].set_title('HSV - Value (0-255)')
     axes[0, 3].axis('off')
 
     # LAB channels
-    axes[1, 0].imshow(lab[:, :, 0], cmap='gray')
-    axes[1, 0].set_title('LAB - Lightness')
+    axes[1, 0].imshow(lab[:, :, 0], cmap='gray', vmin=0, vmax=100)
+    axes[1, 0].set_title('LAB - L* (0-100)')
     axes[1, 0].axis('off')
 
-    axes[1, 1].imshow(lab[:, :, 1], cmap='RdYlGn_r')
-    axes[1, 1].set_title('LAB - A (green-red)')
+    axes[1, 1].imshow(lab[:, :, 1], cmap='RdYlGn_r', vmin=-127, vmax=127)
+    axes[1, 1].set_title('LAB - A* (-127 to 127)')
     axes[1, 1].axis('off')
 
-    axes[1, 2].imshow(lab[:, :, 2], cmap='YlGnBu_r')
-    axes[1, 2].set_title('LAB - B (blue-yellow)')
+    axes[1, 2].imshow(lab[:, :, 2], cmap='YlGnBu_r', vmin=-127, vmax=127)
+    axes[1, 2].set_title('LAB - B* (-127 to 127)')
     axes[1, 2].axis('off')
 
     # YCbCr Y channel
-    axes[1, 3].imshow(ycbcr[:, :, 0], cmap='gray')
-    axes[1, 3].set_title('YCbCr - Luma (Y)')
+    axes[1, 3].imshow(ycbcr[:, :, 0], cmap='gray', vmin=0, vmax=255)
+    axes[1, 3].set_title('YCbCr - Luma (0-255)')
     axes[1, 3].axis('off')
 
     plt.tight_layout()

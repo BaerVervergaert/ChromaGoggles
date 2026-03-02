@@ -5,6 +5,7 @@ A comprehensive image analysis application that visualizes RGB channels,
 color space transformations, and statistical distributions.
 """
 import streamlit as st
+import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 
@@ -203,16 +204,20 @@ def main():
             luv = analyzer.get_luv()
 
             fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-            axes[0].imshow(luv[:, :, 0], cmap='gray')
-            axes[0].set_title('L* (Lightness)')
+
+            # L* component (lightness): 0-100
+            axes[0].imshow(luv[:, :, 0], cmap='gray', vmin=0, vmax=100)
+            axes[0].set_title('L* (Lightness 0-100)')
             axes[0].axis('off')
 
-            axes[1].imshow(luv[:, :, 1], cmap='RdYlGn_r')
+            # U* component: typically ranges from -100 to 100
+            axes[1].imshow(luv[:, :, 1], cmap='RdYlGn_r', vmin=-100, vmax=100)
             axes[1].set_title('U* component (green-red)')
             axes[1].axis('off')
 
-            axes[2].imshow(luv[:, :, 2], cmap='YlGnBu_r')
-            axes[2].set_title('V* component')
+            # V* component: typically ranges from -100 to 100
+            axes[2].imshow(luv[:, :, 2], cmap='YlGnBu_r', vmin=-100, vmax=100)
+            axes[2].set_title('V* component (yellow-blue)')
             axes[2].axis('off')
 
             plt.tight_layout()
@@ -224,15 +229,22 @@ def main():
             xyz = analyzer.get_xyz()
 
             fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-            axes[0].imshow(xyz[:, :, 0], cmap='Reds')
+
+            # X component
+            x_min, x_max = np.nanmin(xyz[:, :, 0]), np.nanmax(xyz[:, :, 0])
+            axes[0].imshow(xyz[:, :, 0], cmap='Reds', vmin=x_min, vmax=x_max)
             axes[0].set_title('X component')
             axes[0].axis('off')
 
-            axes[1].imshow(xyz[:, :, 1], cmap='Greens')
+            # Y component (luminance)
+            y_min, y_max = np.nanmin(xyz[:, :, 1]), np.nanmax(xyz[:, :, 1])
+            axes[1].imshow(xyz[:, :, 1], cmap='Greens', vmin=y_min, vmax=y_max)
             axes[1].set_title('Y component (luminance)')
             axes[1].axis('off')
 
-            axes[2].imshow(xyz[:, :, 2], cmap='Blues')
+            # Z component
+            z_min, z_max = np.nanmin(xyz[:, :, 2]), np.nanmax(xyz[:, :, 2])
+            axes[2].imshow(xyz[:, :, 2], cmap='Blues', vmin=z_min, vmax=z_max)
             axes[2].set_title('Z component')
             axes[2].axis('off')
 
@@ -245,7 +257,7 @@ def main():
             gray = analyzer.get_grayscale()
 
             fig, ax = plt.subplots(1, 1, figsize=(8, 8))
-            ax.imshow(gray, cmap='gray')
+            ax.imshow(gray, cmap='gray', vmin=0, vmax=255)
             ax.set_title('Grayscale')
             ax.axis('off')
             st.pyplot(fig)
