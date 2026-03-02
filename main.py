@@ -20,6 +20,12 @@ from visualizer import (
     create_rgb_scatter_plots,
     create_hcl_scatter_plots,
     create_xyz_visualization,
+    create_hsv_comparison,
+    create_hsv_density_plots,
+    create_hsv_scatter_plots,
+    create_lab_comparison,
+    create_lab_density_plots,
+    create_lab_scatter_plots,
 )
 
 
@@ -64,9 +70,13 @@ def main():
         st.info(f"Image size: {analyzer.width} × {analyzer.height} pixels")
 
         # Create tabs for different analyses
-        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
             "RGB Channels",
             "RGB Statistics",
+            "HSV Channels",
+            "HSV Statistics",
+            "LAB Channels",
+            "LAB Statistics",
             "Hue-Chroma-Luminance",
             "HCL Statistics",
             "Color Spaces",
@@ -128,6 +138,118 @@ def main():
                 st.metric("Blue Min/Max", f"{b_channel.min()} / {b_channel.max()}")
 
         with tab3:
+            st.header("HSV Channel Decomposition")
+            st.markdown("""
+            The HSV color space represents colors using:
+            - **Hue**: The color type (0-180° in OpenCV)
+            - **Saturation**: Color intensity/purity (0-255)
+            - **Value**: Brightness (0-255)
+            """)
+
+            # Get HSV values
+            hsv = analyzer.get_hsv()
+
+            # Show HSV images
+            fig_hsv = create_hsv_comparison(hsv)
+            st.pyplot(fig_hsv)
+            plt.close()
+
+        with tab4:
+            st.header("HSV Statistical Distribution")
+
+            hsv = analyzer.get_hsv()
+
+            # Show density plots
+            fig_hsv_density = create_hsv_density_plots(hsv)
+            st.pyplot(fig_hsv_density)
+            plt.close()
+
+            # Show scatter plots
+            st.subheader("HSV Dimension Relationships")
+            fig_hsv_scatter = create_hsv_scatter_plots(hsv, analyzer.original_image)
+            st.pyplot(fig_hsv_scatter)
+            plt.close()
+
+            # Show statistics
+            st.subheader("HSV Statistics")
+            col1, col2, col3 = st.columns(3)
+
+            hue_values = hsv[:, :, 0].flatten()
+            saturation_values = hsv[:, :, 1].flatten()
+            value_values = hsv[:, :, 2].flatten()
+
+            with col1:
+                st.metric("Hue Mean", f"{hue_values.mean():.2f}")
+                st.metric("Hue Std Dev", f"{hue_values.std():.2f}")
+                st.metric("Hue Min/Max", f"{hue_values.min():.0f} / {hue_values.max():.0f}")
+
+            with col2:
+                st.metric("Saturation Mean", f"{saturation_values.mean():.2f}")
+                st.metric("Saturation Std Dev", f"{saturation_values.std():.2f}")
+                st.metric("Saturation Min/Max", f"{saturation_values.min():.0f} / {saturation_values.max():.0f}")
+
+            with col3:
+                st.metric("Value Mean", f"{value_values.mean():.2f}")
+                st.metric("Value Std Dev", f"{value_values.std():.2f}")
+                st.metric("Value Min/Max", f"{value_values.min():.0f} / {value_values.max():.0f}")
+
+        with tab5:
+            st.header("LAB Channel Decomposition")
+            st.markdown("""
+            The LAB (CIELAB) color space represents colors using:
+            - **L***: Lightness (0-100)
+            - **A***: Green-Red axis (-127 to 127)
+            - **B***: Blue-Yellow axis (-127 to 127)
+            """)
+
+            # Get LAB values
+            lab = analyzer.get_lab()
+
+            # Show LAB images
+            fig_lab = create_lab_comparison(lab)
+            st.pyplot(fig_lab)
+            plt.close()
+
+        with tab6:
+            st.header("LAB Statistical Distribution")
+
+            lab = analyzer.get_lab()
+
+            # Show density plots
+            fig_lab_density = create_lab_density_plots(lab)
+            st.pyplot(fig_lab_density)
+            plt.close()
+
+            # Show scatter plots
+            st.subheader("LAB Dimension Relationships")
+            fig_lab_scatter = create_lab_scatter_plots(lab, analyzer.original_image)
+            st.pyplot(fig_lab_scatter)
+            plt.close()
+
+            # Show statistics
+            st.subheader("LAB Statistics")
+            col1, col2, col3 = st.columns(3)
+
+            l_values = lab[:, :, 0].flatten()
+            a_values = lab[:, :, 1].flatten()
+            b_values = lab[:, :, 2].flatten()
+
+            with col1:
+                st.metric("L* Mean", f"{l_values.mean():.2f}")
+                st.metric("L* Std Dev", f"{l_values.std():.2f}")
+                st.metric("L* Min/Max", f"{l_values.min():.2f} / {l_values.max():.2f}")
+
+            with col2:
+                st.metric("A* Mean", f"{a_values.mean():.2f}")
+                st.metric("A* Std Dev", f"{a_values.std():.2f}")
+                st.metric("A* Min/Max", f"{a_values.min():.2f} / {a_values.max():.2f}")
+
+            with col3:
+                st.metric("B* Mean", f"{b_values.mean():.2f}")
+                st.metric("B* Std Dev", f"{b_values.std():.2f}")
+                st.metric("B* Min/Max", f"{b_values.min():.2f} / {b_values.max():.2f}")
+
+        with tab7:
             st.header("Hue, Chroma, and Luminance (LCh)")
             st.markdown("""
             The LCh color space represents colors using:
@@ -144,7 +266,7 @@ def main():
             st.pyplot(fig_hcl)
             plt.close()
 
-        with tab4:
+        with tab8:
             st.header("HCL Statistical Distribution")
 
             hue, chroma, luminance = analyzer.get_hcl()
@@ -176,7 +298,7 @@ def main():
                 st.metric("Luminance Mean", f"{luminance.mean():.2f}")
                 st.metric("Luminance Std Dev", f"{luminance.std():.2f}")
 
-        with tab5:
+        with tab9:
             st.header("Color Space Comparison")
             st.markdown("""
             Different color spaces represent the same image in various ways:
@@ -197,7 +319,7 @@ def main():
             st.pyplot(fig_colorspaces)
             plt.close()
 
-        with tab6:
+        with tab10:
             st.header("Advanced Color Space Analysis")
 
             # LUV color space
@@ -250,11 +372,12 @@ def main():
         # Show sample information
         st.markdown("""
         ### Features:
-        - **RGB Channel Analysis**: View individual red, green, and blue channels
-        - **Statistical Distributions**: Histograms and density plots for each channel
-        - **HCL Analysis**: Hue, Chroma, and Luminance decomposition
-        - **Multiple Color Spaces**: HSV, LAB, YCbCr, LUV, XYZ representations
-        - **Advanced Visualizations**: Comprehensive color space comparisons
+        - **RGB Channel Analysis**: View individual red, green, and blue channels with statistics
+        - **HSV Analysis**: Hue, Saturation, and Value decomposition with statistical distributions
+        - **LAB Analysis**: CIELAB color space with L*, A*, and B* channels and scatter plots
+        - **HCL Analysis**: Hue, Chroma, and Luminance (LCh) decomposition
+        - **Multiple Color Spaces**: Comprehensive analysis across HSV, LAB, YCbCr, LUV, XYZ
+        - **Advanced Visualizations**: Scatter plots, density plots, and histograms for all color spaces
         
         ### Supported formats:
         PNG, JPG, JPEG, BMP, TIFF

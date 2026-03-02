@@ -537,3 +537,424 @@ def create_xyz_visualization(xyz_image):
 
     plt.tight_layout()
     return fig
+
+
+def create_hsv_comparison(hsv_image):
+    """
+    Create a comparison plot of HSV channels.
+
+    Args:
+        hsv_image: HSV image array with shape (height, width, 3)
+                   H: 0-180 (OpenCV convention)
+                   S: 0-255
+                   V: 0-255
+
+    Returns:
+        Matplotlib figure
+    """
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+    # Hue channel - use hsv colormap, scale 0-180 (OpenCV convention)
+    im_h = axes[0].imshow(hsv_image[:, :, 0], cmap='hsv', vmin=0, vmax=180)
+    axes[0].set_title('Hue (0-180)')
+    axes[0].axis('off')
+    plt.colorbar(im_h, ax=axes[0], fraction=0.046)
+
+    # Saturation channel - grayscale
+    im_s = axes[1].imshow(hsv_image[:, :, 1], cmap='gray', vmin=0, vmax=255)
+    axes[1].set_title('Saturation (0-255)')
+    axes[1].axis('off')
+    plt.colorbar(im_s, ax=axes[1], fraction=0.046)
+
+    # Value channel - grayscale
+    im_v = axes[2].imshow(hsv_image[:, :, 2], cmap='gray', vmin=0, vmax=255)
+    axes[2].set_title('Value (0-255)')
+    axes[2].axis('off')
+    plt.colorbar(im_v, ax=axes[2], fraction=0.046)
+
+    plt.tight_layout()
+    return fig
+
+
+def create_hsv_density_plots(hsv_image):
+    """
+    Create density plots for HSV channels.
+
+    Args:
+        hsv_image: HSV image array with shape (height, width, 3)
+
+    Returns:
+        Matplotlib figure
+    """
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+
+    # Extract and flatten channels
+    hue_flat = hsv_image[:, :, 0].flatten()
+    saturation_flat = hsv_image[:, :, 1].flatten()
+    value_flat = hsv_image[:, :, 2].flatten()
+
+    # Hue histogram
+    axes[0, 0].hist(hue_flat, bins=180, color='red', alpha=0.7, edgecolor='black')
+    axes[0, 0].set_title('Hue Distribution')
+    axes[0, 0].set_xlabel('Hue (0-180)')
+    axes[0, 0].set_ylabel('Frequency')
+    axes[0, 0].set_xlim(0, 180)
+
+    # Saturation histogram
+    axes[0, 1].hist(saturation_flat, bins=256, color='green', alpha=0.7, edgecolor='black')
+    axes[0, 1].set_title('Saturation Distribution')
+    axes[0, 1].set_xlabel('Saturation (0-255)')
+    axes[0, 1].set_ylabel('Frequency')
+    axes[0, 1].set_xlim(0, 255)
+
+    # Value histogram
+    axes[0, 2].hist(value_flat, bins=256, color='blue', alpha=0.7, edgecolor='black')
+    axes[0, 2].set_title('Value Distribution')
+    axes[0, 2].set_xlabel('Value (0-255)')
+    axes[0, 2].set_ylabel('Frequency')
+    axes[0, 2].set_xlim(0, 255)
+
+    # Hue KDE plot
+    try:
+        sns.kdeplot(hue_flat, ax=axes[1, 0], fill=True, color='red', alpha=0.6)
+        axes[1, 0].set_title('Hue Density (KDE)')
+        axes[1, 0].set_xlabel('Hue (0-180)')
+        axes[1, 0].set_ylabel('Density')
+        axes[1, 0].set_xlim(0, 180)
+    except Exception:
+        axes[1, 0].text(0.5, 0.5, 'KDE not available', ha='center', va='center')
+
+    # Saturation KDE plot
+    try:
+        sns.kdeplot(saturation_flat, ax=axes[1, 1], fill=True, color='green', alpha=0.6)
+        axes[1, 1].set_title('Saturation Density (KDE)')
+        axes[1, 1].set_xlabel('Saturation (0-255)')
+        axes[1, 1].set_ylabel('Density')
+        axes[1, 1].set_xlim(0, 255)
+    except Exception:
+        axes[1, 1].text(0.5, 0.5, 'KDE not available', ha='center', va='center')
+
+    # Value KDE plot
+    try:
+        sns.kdeplot(value_flat, ax=axes[1, 2], fill=True, color='blue', alpha=0.6)
+        axes[1, 2].set_title('Value Density (KDE)')
+        axes[1, 2].set_xlabel('Value (0-255)')
+        axes[1, 2].set_ylabel('Density')
+        axes[1, 2].set_xlim(0, 255)
+    except Exception:
+        axes[1, 2].text(0.5, 0.5, 'KDE not available', ha='center', va='center')
+
+    plt.tight_layout()
+    return fig
+
+
+def create_hsv_scatter_plots(hsv_image, rgb_image=None):
+    """
+    Create scatter plots showing relationships between HSV dimensions.
+    Uses density-based alpha values to highlight concentrations.
+    Colors points by their actual RGB values from the image.
+
+    Args:
+        hsv_image: HSV image array with shape (height, width, 3)
+        rgb_image: Original RGB image (optional, for coloring points)
+
+    Returns:
+        Matplotlib figure
+    """
+    # Flatten arrays and sample for clarity (don't plot all pixels)
+    hue_flat = hsv_image[:, :, 0].flatten()
+    saturation_flat = hsv_image[:, :, 1].flatten()
+    value_flat = hsv_image[:, :, 2].flatten()
+
+    # Sample pixels for better performance (every 10th pixel)
+    sample_idx = np.arange(0, len(hue_flat), 10)
+    hue_sample = hue_flat[sample_idx]
+    saturation_sample = saturation_flat[sample_idx]
+    value_sample = value_flat[sample_idx]
+
+    # Get RGB colors if image is provided
+    rgb_colors = None
+    if rgb_image is not None:
+        rgb_flat = rgb_image.reshape(-1, 3)
+        rgb_colors = rgb_flat[sample_idx] / 255.0  # Normalize to [0, 1]
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+    # Hue vs Saturation - calculate density-based alpha using histogram binning
+    h_hs, xedges, yedges = np.histogram2d(hue_sample, saturation_sample, bins=20)
+    x_indices = np.digitize(hue_sample, xedges) - 1
+    y_indices = np.digitize(saturation_sample, yedges) - 1
+    counts_hs = h_hs[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
+    alpha_hs = np.clip(np.sqrt(counts_hs) / np.sqrt(counts_hs.max()) * 0.7 + 0.1, 0.1, 0.8)
+
+    # Hue vs Saturation - color by actual RGB values if available
+    if rgb_colors is not None:
+        axes[0].scatter(hue_sample, saturation_sample, alpha=alpha_hs, s=10, c=rgb_colors)
+    else:
+        scatter1 = axes[0].scatter(hue_sample, saturation_sample, alpha=alpha_hs, s=10,
+                                   c=hue_sample, cmap='hsv', vmin=0, vmax=180)
+        plt.colorbar(scatter1, ax=axes[0])
+
+    axes[0].set_xlabel('Hue (0-180)')
+    axes[0].set_ylabel('Saturation (0-255)')
+    axes[0].set_title('Hue vs Saturation')
+    axes[0].set_xlim(0, 180)
+    axes[0].set_ylim(0, 255)
+    axes[0].grid(True, alpha=0.3)
+
+    # Hue vs Value - calculate density-based alpha using histogram binning
+    h_hv, xedges, yedges = np.histogram2d(hue_sample, value_sample, bins=20)
+    x_indices = np.digitize(hue_sample, xedges) - 1
+    y_indices = np.digitize(value_sample, yedges) - 1
+    counts_hv = h_hv[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
+    alpha_hv = np.clip(np.sqrt(counts_hv) / np.sqrt(counts_hv.max()) * 0.7 + 0.1, 0.1, 0.8)
+
+    # Hue vs Value - color by actual RGB values if available
+    if rgb_colors is not None:
+        axes[1].scatter(hue_sample, value_sample, alpha=alpha_hv, s=10, c=rgb_colors)
+    else:
+        scatter2 = axes[1].scatter(hue_sample, value_sample, alpha=alpha_hv, s=10,
+                                   c=hue_sample, cmap='hsv', vmin=0, vmax=180)
+        plt.colorbar(scatter2, ax=axes[1])
+
+    axes[1].set_xlabel('Hue (0-180)')
+    axes[1].set_ylabel('Value (0-255)')
+    axes[1].set_title('Hue vs Value')
+    axes[1].set_xlim(0, 180)
+    axes[1].set_ylim(0, 255)
+    axes[1].grid(True, alpha=0.3)
+
+    # Saturation vs Value - calculate density-based alpha using histogram binning
+    h_sv, xedges, yedges = np.histogram2d(saturation_sample, value_sample, bins=20)
+    x_indices = np.digitize(saturation_sample, xedges) - 1
+    y_indices = np.digitize(value_sample, yedges) - 1
+    counts_sv = h_sv[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
+    alpha_sv = np.clip(np.sqrt(counts_sv) / np.sqrt(counts_sv.max()) * 0.7 + 0.1, 0.1, 0.8)
+
+    # Saturation vs Value - color by actual RGB values if available
+    if rgb_colors is not None:
+        axes[2].scatter(saturation_sample, value_sample, alpha=alpha_sv, s=10, c=rgb_colors)
+    else:
+        scatter3 = axes[2].scatter(saturation_sample, value_sample, alpha=alpha_sv, s=10,
+                                   c=value_sample, cmap='gray', vmin=0, vmax=255)
+        plt.colorbar(scatter3, ax=axes[2])
+
+    axes[2].set_xlabel('Saturation (0-255)')
+    axes[2].set_ylabel('Value (0-255)')
+    axes[2].set_title('Saturation vs Value')
+    axes[2].set_xlim(0, 255)
+    axes[2].set_ylim(0, 255)
+    axes[2].grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    return fig
+
+
+def create_lab_comparison(lab_image):
+    """
+    Create a comparison plot of LAB channels.
+
+    Args:
+        lab_image: LAB image array with shape (height, width, 3)
+                   L*: 0-100 (lightness)
+                   A*: -127 to 127 (green-red)
+                   B*: -127 to 127 (blue-yellow)
+
+    Returns:
+        Matplotlib figure
+    """
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+    # L* channel - Lightness (grayscale)
+    im_l = axes[0].imshow(lab_image[:, :, 0], cmap='gray', vmin=0, vmax=100)
+    axes[0].set_title('L* - Lightness (0-100)')
+    axes[0].axis('off')
+    plt.colorbar(im_l, ax=axes[0], fraction=0.046)
+
+    # A* channel - Green to Red
+    im_a = axes[1].imshow(lab_image[:, :, 1], cmap='RdYlGn_r', vmin=-127, vmax=127)
+    axes[1].set_title('A* - Green to Red (-127 to 127)')
+    axes[1].axis('off')
+    plt.colorbar(im_a, ax=axes[1], fraction=0.046)
+
+    # B* channel - Blue to Yellow
+    im_b = axes[2].imshow(lab_image[:, :, 2], cmap='YlGnBu_r', vmin=-127, vmax=127)
+    axes[2].set_title('B* - Blue to Yellow (-127 to 127)')
+    axes[2].axis('off')
+    plt.colorbar(im_b, ax=axes[2], fraction=0.046)
+
+    plt.tight_layout()
+    return fig
+
+
+def create_lab_density_plots(lab_image):
+    """
+    Create density plots for LAB channels.
+
+    Args:
+        lab_image: LAB image array with shape (height, width, 3)
+
+    Returns:
+        Matplotlib figure
+    """
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+
+    # Extract and flatten channels
+    l_flat = lab_image[:, :, 0].flatten()
+    a_flat = lab_image[:, :, 1].flatten()
+    b_flat = lab_image[:, :, 2].flatten()
+
+    # L* histogram
+    axes[0, 0].hist(l_flat, bins=100, color='gray', alpha=0.7, edgecolor='black')
+    axes[0, 0].set_title('L* (Lightness) Distribution')
+    axes[0, 0].set_xlabel('L* (0-100)')
+    axes[0, 0].set_ylabel('Frequency')
+    axes[0, 0].set_xlim(0, 100)
+
+    # A* histogram
+    axes[0, 1].hist(a_flat, bins=100, color='red', alpha=0.7, edgecolor='black')
+    axes[0, 1].set_title('A* (Green-Red) Distribution')
+    axes[0, 1].set_xlabel('A* (-127 to 127)')
+    axes[0, 1].set_ylabel('Frequency')
+    axes[0, 1].set_xlim(-127, 127)
+
+    # B* histogram
+    axes[0, 2].hist(b_flat, bins=100, color='blue', alpha=0.7, edgecolor='black')
+    axes[0, 2].set_title('B* (Blue-Yellow) Distribution')
+    axes[0, 2].set_xlabel('B* (-127 to 127)')
+    axes[0, 2].set_ylabel('Frequency')
+    axes[0, 2].set_xlim(-127, 127)
+
+    # L* KDE plot
+    try:
+        sns.kdeplot(l_flat, ax=axes[1, 0], fill=True, color='gray', alpha=0.6)
+        axes[1, 0].set_title('L* Density (KDE)')
+        axes[1, 0].set_xlabel('L* (0-100)')
+        axes[1, 0].set_ylabel('Density')
+        axes[1, 0].set_xlim(0, 100)
+    except Exception:
+        axes[1, 0].text(0.5, 0.5, 'KDE not available', ha='center', va='center')
+
+    # A* KDE plot
+    try:
+        sns.kdeplot(a_flat, ax=axes[1, 1], fill=True, color='red', alpha=0.6)
+        axes[1, 1].set_title('A* Density (KDE)')
+        axes[1, 1].set_xlabel('A* (-127 to 127)')
+        axes[1, 1].set_ylabel('Density')
+        axes[1, 1].set_xlim(-127, 127)
+    except Exception:
+        axes[1, 1].text(0.5, 0.5, 'KDE not available', ha='center', va='center')
+
+    # B* KDE plot
+    try:
+        sns.kdeplot(b_flat, ax=axes[1, 2], fill=True, color='blue', alpha=0.6)
+        axes[1, 2].set_title('B* Density (KDE)')
+        axes[1, 2].set_xlabel('B* (-127 to 127)')
+        axes[1, 2].set_ylabel('Density')
+        axes[1, 2].set_xlim(-127, 127)
+    except Exception:
+        axes[1, 2].text(0.5, 0.5, 'KDE not available', ha='center', va='center')
+
+    plt.tight_layout()
+    return fig
+
+
+def create_lab_scatter_plots(lab_image, rgb_image=None):
+    """
+    Create scatter plots showing relationships between LAB dimensions.
+    Uses density-based alpha values to highlight concentrations.
+    Colors points by their actual RGB values from the image.
+
+    Args:
+        lab_image: LAB image array with shape (height, width, 3)
+        rgb_image: Original RGB image (optional, for coloring points)
+
+    Returns:
+        Matplotlib figure
+    """
+    # Flatten arrays and sample for clarity (don't plot all pixels)
+    l_flat = lab_image[:, :, 0].flatten()
+    a_flat = lab_image[:, :, 1].flatten()
+    b_flat = lab_image[:, :, 2].flatten()
+
+    # Sample pixels for better performance (every 10th pixel)
+    sample_idx = np.arange(0, len(l_flat), 10)
+    l_sample = l_flat[sample_idx]
+    a_sample = a_flat[sample_idx]
+    b_sample = b_flat[sample_idx]
+
+    # Get RGB colors if image is provided
+    rgb_colors = None
+    if rgb_image is not None:
+        rgb_flat = rgb_image.reshape(-1, 3)
+        rgb_colors = rgb_flat[sample_idx] / 255.0  # Normalize to [0, 1]
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+    # A* vs B* (color space diagram) - calculate density-based alpha
+    h_ab, xedges, yedges = np.histogram2d(a_sample, b_sample, bins=20)
+    x_indices = np.digitize(a_sample, xedges) - 1
+    y_indices = np.digitize(b_sample, yedges) - 1
+    counts_ab = h_ab[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
+    alpha_ab = np.clip(np.sqrt(counts_ab) / np.sqrt(counts_ab.max()) * 0.7 + 0.1, 0.1, 0.8)
+
+    # A* vs B* - color by actual RGB values if available
+    if rgb_colors is not None:
+        axes[0].scatter(a_sample, b_sample, alpha=alpha_ab, s=10, c=rgb_colors)
+    else:
+        axes[0].scatter(a_sample, b_sample, alpha=alpha_ab, s=10, c='blue')
+
+    axes[0].set_xlabel('A* (Green ← → Red)')
+    axes[0].set_ylabel('B* (Blue ← → Yellow)')
+    axes[0].set_title('A* vs B* (Color Plane)')
+    axes[0].set_xlim(-127, 127)
+    axes[0].set_ylim(-127, 127)
+    axes[0].axhline(y=0, color='k', linestyle='--', alpha=0.3)
+    axes[0].axvline(x=0, color='k', linestyle='--', alpha=0.3)
+    axes[0].grid(True, alpha=0.3)
+
+    # L* vs A* - calculate density-based alpha
+    h_la, xedges, yedges = np.histogram2d(l_sample, a_sample, bins=20)
+    x_indices = np.digitize(l_sample, xedges) - 1
+    y_indices = np.digitize(a_sample, yedges) - 1
+    counts_la = h_la[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
+    alpha_la = np.clip(np.sqrt(counts_la) / np.sqrt(counts_la.max()) * 0.7 + 0.1, 0.1, 0.8)
+
+    # L* vs A* - color by actual RGB values if available
+    if rgb_colors is not None:
+        axes[1].scatter(l_sample, a_sample, alpha=alpha_la, s=10, c=rgb_colors)
+    else:
+        axes[1].scatter(l_sample, a_sample, alpha=alpha_la, s=10, c='green')
+
+    axes[1].set_xlabel('L* (Lightness)')
+    axes[1].set_ylabel('A* (Green ← → Red)')
+    axes[1].set_title('L* vs A*')
+    axes[1].set_xlim(0, 100)
+    axes[1].set_ylim(-127, 127)
+    axes[1].axhline(y=0, color='k', linestyle='--', alpha=0.3)
+    axes[1].grid(True, alpha=0.3)
+
+    # L* vs B* - calculate density-based alpha
+    h_lb, xedges, yedges = np.histogram2d(l_sample, b_sample, bins=20)
+    x_indices = np.digitize(l_sample, xedges) - 1
+    y_indices = np.digitize(b_sample, yedges) - 1
+    counts_lb = h_lb[np.clip(x_indices, 0, 19), np.clip(y_indices, 0, 19)]
+    alpha_lb = np.clip(np.sqrt(counts_lb) / np.sqrt(counts_lb.max()) * 0.7 + 0.1, 0.1, 0.8)
+
+    # L* vs B* - color by actual RGB values if available
+    if rgb_colors is not None:
+        axes[2].scatter(l_sample, b_sample, alpha=alpha_lb, s=10, c=rgb_colors)
+    else:
+        axes[2].scatter(l_sample, b_sample, alpha=alpha_lb, s=10, c='orange')
+
+    axes[2].set_xlabel('L* (Lightness)')
+    axes[2].set_ylabel('B* (Blue ← → Yellow)')
+    axes[2].set_title('L* vs B*')
+    axes[2].set_xlim(0, 100)
+    axes[2].set_ylim(-127, 127)
+    axes[2].axhline(y=0, color='k', linestyle='--', alpha=0.3)
+    axes[2].grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    return fig
+
