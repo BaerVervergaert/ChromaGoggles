@@ -3,8 +3,51 @@ Visualization module for creating plots and displays of image analysis.
 """
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import seaborn as sns
-from matplotlib.figure import Figure
+from skimage import color
+
+
+def create_lch_hue_colormap():
+    """
+    Create a custom colormap for LCh hue that correctly maps hue angles to perceptual colors.
+
+    LCh hue angles follow the perceptual color wheel:
+    - 0° = Red
+    - 90° = Yellow
+    - 180° = Green
+    - 270° = Blue
+    - 360° = Red again
+
+    Returns:
+        A matplotlib ListedColormap for LCh hue visualization
+    """
+    # Create a range of hue angles from 0 to 360 degrees
+    n_colors = 360
+    hue_angles = np.linspace(0, 360, n_colors)
+
+    # Create a dummy LCh image with max chroma and luminance for pure color representation
+    # Use high L* (80) and high C* (100) for vibrant colors
+    hue_rad = np.radians(hue_angles)
+
+    # Create LCh colors in cylindrical form
+    rgb_colors = np.zeros((n_colors, 3))
+
+    for i, h in enumerate(hue_rad):
+        # Create LCh color with high luminance and chroma for vivid hue representation
+        lch = np.array([65, 100, h])  # L*=65, C*=100, h=angle
+
+        # Convert LCh to LAB
+        lab = color.lch2lab(lch)
+
+        # Convert LAB to RGB
+        rgb = color.lab2rgb(lab.reshape(1, 1, 3)).reshape(3)
+
+        # Clip values to valid RGB range [0, 1]
+        rgb_colors[i] = np.clip(rgb, 0, 1)
+
+    # Create a ListedColormap from the RGB colors
+    return mcolors.ListedColormap(rgb_colors)
 
 
 def create_channel_comparison(r_channel, g_channel, b_channel):
@@ -81,17 +124,15 @@ def create_hcl_comparison(hue, chroma, luminance):
     """
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
-    # Hue - use HSV colormap for better representation, scale 0-360
-    # TODO: HSV is the wrong colormap for hue from LCh. The angles in LCh have different meaning than the hue in HSV. Consider using a custom colormap or a circular representation for better visualization.
-    im1 = axes[0].imshow(hue, cmap='hsv', vmin=0, vmax=360)
+    # Hue - use custom LCh hue colormap for correct perceptual color representation
+    lch_hue_cmap = create_lch_hue_colormap()
+    im1 = axes[0].imshow(hue, cmap=lch_hue_cmap, vmin=0, vmax=360)
     axes[0].set_title('Hue (0-360°)')
     axes[0].axis('off')
     plt.colorbar(im1, ax=axes[0], fraction=0.046)
 
     # Chroma - scale to actual data range
-    # TODO: Determine the correct range of chroma values for better visualization (currently using min/max of data)
-    chroma_min, chroma_max = np.nanmin(chroma), np.nanmax(chroma)
-    im2 = axes[1].imshow(chroma, cmap='gray', vmin=chroma_min, vmax=chroma_max)
+    im2 = axes[1].imshow(chroma, cmap='gray', vmin=0, vmax=100)
     axes[1].set_title('Chroma')
     axes[1].axis('off')
     plt.colorbar(im2, ax=axes[1], fraction=0.046)
@@ -453,3 +494,56 @@ def create_hcl_scatter_plots(hue, chroma, luminance, rgb_image=None):
     plt.tight_layout()
     return fig
 
+
+def create_xyz_visualization(xyz_image):
+    """
+    Create a visualization of XYZ color space components.
+
+    XYZ is a tristimulus color space where:
+    - X: Red-like component (derived from red and green cone responses)
+    - Y: Luminance component (brightness)
+    - Z: Blue-like component (derived from blue cone response)
+
+    Args:
+        xyz_image: XYZ image array with shape (height, width, 3)
+
+    Returns:
+        Matplotlib figure
+    """
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+    # Extract individual components
+    x_component = xyz_image[:, :, 0]
+    y_component = xyz_image[:, :, 1]
+    z_component = xyz_image[:, :, 2]
+
+    # # Get value ranges for proper normalization
+    # x_min, x_max = np.nanmin(x_component), np.nanmax(x_component)
+    # y_min, y_max = np.nanmin(y_component), np.nanmax(y_component)
+    # z_min, z_max = np.nanmin(z_component), np.nanmax(z_component)
+    #
+    # # Normalize components to [0, 1] for visualization
+    # x_norm = (x_component - x_min) / (x_max - x_min) if x_max > x_min else x_component
+    # y_norm = (y_component - y_min) / (y_max - y_min) if y_max > y_min else y_component
+    # z_norm = (z_component - z_min) / (z_max - z_min) if z_max > z_min else z_component
+    #
+    # X component - Red-like (warm colors: black to red to yellow)
+    im_x = axes[0].imshow(x_component, cmap='hot', vmin=0, vmax=1)
+    axes[0].set_title(f'X component (Red-like)')
+    axes[0].axis('off')
+    plt.colorbar(im_x, ax=axes[0], fraction=0.046)
+
+    # Y component - Luminance (grayscale: black to white)
+    im_y = axes[1].imshow(y_component, cmap='gray', vmin=0, vmax=1)
+    axes[1].set_title(f'Y component (Luminance)')
+    axes[1].axis('off')
+    plt.colorbar(im_y, ax=axes[1], fraction=0.046)
+
+    # Z component - Blue-like (cool colors: black to blue to cyan)
+    im_z = axes[2].imshow(z_component, cmap='cool', vmin=0, vmax=1)
+    axes[2].set_title(f'Z component (Blue-like)')
+    axes[2].axis('off')
+    plt.colorbar(im_z, ax=axes[2], fraction=0.046)
+
+    plt.tight_layout()
+    return fig

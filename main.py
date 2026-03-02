@@ -19,6 +19,7 @@ from visualizer import (
     create_colorspace_comparison,
     create_rgb_scatter_plots,
     create_hcl_scatter_plots,
+    create_xyz_visualization,
 )
 
 
@@ -228,28 +229,8 @@ def main():
             st.subheader("XYZ Color Space (CIE 1931)")
             xyz = analyzer.get_xyz()
 
-            fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-
-            # X component
-            x_min, x_max = np.nanmin(xyz[:, :, 0]), np.nanmax(xyz[:, :, 0])
-            axes[0].imshow(xyz[:, :, 0], cmap='Reds', vmin=x_min, vmax=x_max)
-            axes[0].set_title('X component')
-            axes[0].axis('off')
-
-            # Y component (luminance)
-            y_min, y_max = np.nanmin(xyz[:, :, 1]), np.nanmax(xyz[:, :, 1])
-            axes[1].imshow(xyz[:, :, 1], cmap='Greens', vmin=y_min, vmax=y_max)
-            axes[1].set_title('Y component (luminance)')
-            axes[1].axis('off')
-
-            # Z component
-            z_min, z_max = np.nanmin(xyz[:, :, 2]), np.nanmax(xyz[:, :, 2])
-            axes[2].imshow(xyz[:, :, 2], cmap='Blues', vmin=z_min, vmax=z_max)
-            axes[2].set_title('Z component')
-            axes[2].axis('off')
-
-            plt.tight_layout()
-            st.pyplot(fig)
+            fig_xyz = create_xyz_visualization(xyz)
+            st.pyplot(fig_xyz)
             plt.close()
 
             # Grayscale
