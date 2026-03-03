@@ -150,8 +150,18 @@ def main():
             with col1:
                 method = st.radio(
                     "Select color transfer method:",
-                    ["Histogram Matching", "Statistics Matching", "Correlation Preserving"],
-                    help="Histogram: Matches distributions (subtle)\nStatistics: Matches mean/std (aggressive)\nCorrelation Preserving: Preserves relationships between color channels (natural)"
+                    [
+                        "Histogram Matching",
+                        "Statistics Matching",
+                        "Correlation Preserving",
+                        "Nearest Reference Pixels",
+                    ],
+                    help=(
+                        "Histogram: Matches distributions (subtle)\n"
+                        "Statistics: Matches mean/std (aggressive)\n"
+                        "Correlation Preserving: Preserves channel relationships (natural)\n"
+                        "Nearest Reference Pixels: Replaces each scaled source pixel with the closest scaled reference pixel"
+                    )
                 )
 
             with col2:
@@ -159,6 +169,18 @@ def main():
                     "Color space:",
                     ["LAB", "RGB", "HSV", "HCL", "XYZ", "LUV", "YCbCr"],
                     help="LAB and HCL are perceptually uniform and usually give best results"
+                )
+
+            # Extra control for nearest-pixel method to balance quality/performance.
+            working_size = None
+            if method == "Nearest Reference Pixels":
+                working_size = st.slider(
+                    "Nearest-match working size",
+                    min_value=32,
+                    max_value=384,
+                    value=160,
+                    step=16,
+                    help="Both images are scaled to this square resolution before nearest-pixel replacement"
                 )
 
             # Perform color transfer
@@ -177,11 +199,18 @@ def main():
                         reference_img,
                         colorspace=colorspace.lower()
                     )
-                else:  # Correlation Preserving
+                elif method == "Correlation Preserving":
                     transferred = ColorTransfer.match_correlation_preserving(
                         source_img,
                         reference_img,
                         colorspace=colorspace.lower()
+                    )
+                else:  # Nearest Reference Pixels
+                    transferred = ColorTransfer.match_nearest_reference_pixels(
+                        source_img,
+                        reference_img,
+                        colorspace=colorspace.lower(),
+                        working_size=working_size if working_size is not None else 160,
                     )
 
             # Display results
@@ -276,18 +305,26 @@ def main():
             **Histogram Matching**: Transforms the pixel values of the source image so that each channel's histogram matches the reference image's histogram. This is done using cumulative distribution functions (CDFs).
             
             **Statistics Matching**: Adjusts the mean and standard deviation of each color channel in the source image to match the reference image. This is a more aggressive transformation.
+
+            **Correlation Preserving**: Uses an optimal-transport-inspired linear transform to preserve relationships (covariances) between color dimensions, often producing smoother and more natural results.
+
+            **Nearest Reference Pixels**: Scales both images to a common working size, then replaces each source pixel with the closest pixel from the scaled reference image in the selected color space.
             
             ### Color Spaces:
             
             - **LAB**: Perceptually uniform, excellent for color matching (recommended)
+            - **HCL**: Perceptually uniform cylindrical color space, great for hue/chroma aware matching
             - **RGB**: Simple channel-wise matching, may produce color casts
-            - **HSV**: Separates hue, saturation, and value for more intuitive control
+            - **HSV**: Separates hue, saturation, and value for intuitive color control
+            - **XYZ / LUV / YCbCr**: Useful for technical workflows and alternative transfer behavior
             
             ### Tips:
             
-            - LAB color space usually gives the best perceptual results
+            - LAB or HCL usually gives the best perceptual results
             - Use histogram matching for subtle, natural-looking results
             - Use statistics matching for aggressive color transformation
+            - Use correlation preserving when gradients and natural color relationships matter
+            - Use nearest-reference pixels for palette-quantized, stylized effects
             - Use the blend slider to fine-tune the effect intensity
             """)
 

@@ -1035,4 +1035,101 @@ class ColorTransfer:
 
         return metrics
 
+    @staticmethod
+    def match_nearest_reference_pixels(
+        source: np.ndarray,
+        reference: np.ndarray,
+        colorspace: str = 'lab',
+        working_size: int = 160
+    ) -> np.ndarray:
+        """
+        Replace each pixel in a scaled source image with the closest pixel from
+        a scaled reference image.
 
+        Steps:
+        1) Scale source and reference to the same working shape.
+        2) Build a nearest-neighbor index over reference pixels in the chosen color space.
+        3) Replace every source pixel by its closest reference pixel.
+        4) Resize result back to source shape for consistent app output.
+
+        Args:
+            source: Source RGB image, uint8 [0, 255]
+            reference: Reference RGB image, uint8 [0, 255]
+            colorspace: One of 'rgb', 'lab', 'hsv', 'hcl', 'xyz', 'luv', 'ycbcr'
+            working_size: Common square working resolution used for matching
+
+        Returns:
+            RGB uint8 image with source shape
+        """
+        import cv2
+        from scipy.spatial import cKDTree
+
+        if working_size < 8:
+            raise ValueError("working_size must be >= 8")
+
+        target_hw = (working_size, working_size)
+        # cv2.resize expects (width, height)
+        source_scaled = cv2.resize(source, (target_hw[1], target_hw[0]), interpolation=cv2.INTER_AREA)
+        reference_scaled = cv2.resize(reference, (target_hw[1], target_hw[0]), interpolation=cv2.INTER_AREA)
+
+        source_feat = ColorTransfer._to_matching_features(source_scaled, colorspace)
+        reference_feat = ColorTransfer._to_matching_features(reference_scaled, colorspace)
+
+        source_flat = source_feat.reshape(-1, source_feat.shape[-1])
+        reference_flat = reference_feat.reshape(-1, reference_feat.shape[-1])
+        reference_rgb_flat = reference_scaled.reshape(-1, 3)
+
+        tree = cKDTree(reference_flat)
+        _, nn_idx = tree.query(source_flat, k=1)
+
+        matched_scaled = reference_rgb_flat[nn_idx].reshape(source_scaled.shape)
+
+        # Keep app behavior consistent: output uses original source shape.
+        result = cv2.resize(matched_scaled, (source.shape[1], source.shape[0]), interpolation=cv2.INTER_NEAREST)
+        return np.clip(result, 0, 255).astype(np.uint8)
+
+    @staticmethod
+    def _to_matching_features(image_rgb: np.ndarray, colorspace: str) -> np.ndarray:
+        """Convert RGB image to nearest-neighbor feature vectors for a color space."""
+        import cv2
+
+        if colorspace == 'rgb':
+            return image_rgb.astype(np.float32) / 255.0
+
+        if colorspace == 'lab':
+            return color.rgb2lab(image_rgb / 255.0).astype(np.float32)
+
+        if colorspace == 'hsv':
+            hsv = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2HSV).astype(np.float32)
+            h = hsv[:, :, 0] / 180.0 * (2.0 * np.pi)
+            s = hsv[:, :, 1] / 255.0
+            v = hsv[:, :, 2] / 255.0
+            # Circular hue embedding avoids 0/360 discontinuity.
+            return np.stack([np.cos(h) * s, np.sin(h) * s, v], axis=-1).astype(np.float32)
+
+        if colorspace == 'hcl':
+            lab = color.rgb2lab(image_rgb / 255.0)
+            lch = color.lab2lch(lab).astype(np.float32)
+            l = lch[:, :, 0] / 100.0
+            c = lch[:, :, 1] / 150.0
+            h = lch[:, :, 2]
+            return np.stack([np.cos(h) * c, np.sin(h) * c, l], axis=-1).astype(np.float32)
+
+        if colorspace == 'xyz':
+            return color.rgb2xyz(image_rgb / 255.0).astype(np.float32)
+
+        if colorspace == 'luv':
+            luv = color.rgb2luv(image_rgb / 255.0).astype(np.float32)
+            luv[:, :, 0] /= 100.0
+            luv[:, :, 1] /= 100.0
+            luv[:, :, 2] /= 100.0
+            return luv
+
+        if colorspace == 'ycbcr':
+            ycrcb = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2YCrCb).astype(np.float32)
+            ycbcr = ycrcb.copy()
+            ycbcr[:, :, 1] = ycrcb[:, :, 2]  # Cb
+            ycbcr[:, :, 2] = ycrcb[:, :, 1]  # Cr
+            return ycbcr / 255.0
+
+        raise ValueError(f"Unknown colorspace: {colorspace}")
