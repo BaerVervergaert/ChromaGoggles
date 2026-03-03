@@ -49,6 +49,302 @@ class ColorTransfer:
         return colorspace_map[colorspace](source, reference)
 
     @staticmethod
+    def match_correlation_preserving(
+        source: np.ndarray,
+        reference: np.ndarray,
+        colorspace: str = 'lab'
+    ) -> np.ndarray:
+        """
+        Match color distribution while preserving correlations between channels.
+
+        Uses the Monge-Kantorovich linear color transfer method which preserves
+        the correlation structure between color dimensions. This is based on
+        optimal transport theory and produces more natural-looking results than
+        independent channel matching.
+
+        Reference: "Color Transfer between Images" by Reinhard et al. (2001)
+        and improvements from "N-Dimensional Probability Density Function Transfer"
+
+        Args:
+            source: Source image (height, width, 3), uint8 [0, 255]
+            reference: Reference image (height, width, 3), uint8 [0, 255]
+            colorspace: Color space for matching ('lab', 'rgb', 'hsv', 'hcl', 'xyz', 'luv', 'ycbcr')
+
+        Returns:
+            Transformed image with matched distribution and preserved correlations
+        """
+        colorspace_map = {
+            'lab': ColorTransfer._match_correlation_preserving_lab,
+            'rgb': ColorTransfer._match_correlation_preserving_rgb,
+            'hsv': ColorTransfer._match_correlation_preserving_hsv,
+            'hcl': ColorTransfer._match_correlation_preserving_hcl,
+            'xyz': ColorTransfer._match_correlation_preserving_xyz,
+            'luv': ColorTransfer._match_correlation_preserving_luv,
+            'ycbcr': ColorTransfer._match_correlation_preserving_ycbcr,
+        }
+
+        if colorspace not in colorspace_map:
+            raise ValueError(f"Unknown colorspace: {colorspace}. Supported: {list(colorspace_map.keys())}")
+
+        return colorspace_map[colorspace](source, reference)
+
+    @staticmethod
+    def _apply_monge_kantorovich_transform(
+        source_data: np.ndarray,
+        reference_data: np.ndarray
+    ) -> np.ndarray:
+        """
+        Apply Monge-Kantorovich linear color transfer.
+
+        This preserves the correlation structure by using the full covariance matrix.
+
+        Args:
+            source_data: Source data as (n_pixels, n_channels)
+            reference_data: Reference data as (m_pixels, n_channels)
+
+        Returns:
+            Transformed data as (n_pixels, n_channels)
+        """
+        # Compute means
+        source_mean = source_data.mean(axis=0)
+        reference_mean = reference_data.mean(axis=0)
+
+        # Center the data
+        source_centered = source_data - source_mean
+        reference_centered = reference_data - reference_mean
+
+        # Compute covariance matrices
+        n_source = source_data.shape[0]
+        n_reference = reference_data.shape[0]
+
+        cov_source = (source_centered.T @ source_centered) / (n_source - 1)
+        cov_reference = (reference_centered.T @ reference_centered) / (n_reference - 1)
+
+        # Add small regularization to avoid singular matrices
+        eps = 1e-6
+        cov_source += eps * np.eye(cov_source.shape[0])
+        cov_reference += eps * np.eye(cov_reference.shape[0])
+
+        # Compute the transformation using Cholesky decomposition
+        # T = L_ref @ L_source^(-1)
+        try:
+            L_source = np.linalg.cholesky(cov_source)
+            L_reference = np.linalg.cholesky(cov_reference)
+
+            # Transformation matrix
+            L_source_inv = np.linalg.inv(L_source)
+            T = L_reference @ L_source_inv
+
+        except np.linalg.LinAlgError:
+            # Fallback to SVD if Cholesky fails
+            U_s, S_s, Vt_s = np.linalg.svd(cov_source)
+            U_r, S_r, Vt_r = np.linalg.svd(cov_reference)
+
+            # Regularize singular values
+            S_s = np.maximum(S_s, eps)
+
+            # Transform: sqrt(Sigma_ref) @ sqrt(Sigma_source)^(-1)
+            sqrt_S_source_inv = np.diag(1.0 / np.sqrt(S_s))
+            sqrt_S_reference = np.diag(np.sqrt(S_r))
+
+            T = U_r @ sqrt_S_reference @ sqrt_S_source_inv @ Vt_s
+
+        # Apply transformation
+        result = source_centered @ T.T + reference_mean
+
+        return result
+
+    @staticmethod
+    def _match_correlation_preserving_lab(
+        source: np.ndarray,
+        reference: np.ndarray
+    ) -> np.ndarray:
+        """Match LAB with correlation preservation."""
+        # Convert to LAB
+        source_norm = source / 255.0
+        reference_norm = reference / 255.0
+
+        source_lab = color.rgb2lab(source_norm)
+        reference_lab = color.rgb2lab(reference_norm)
+
+        # Reshape to (n_pixels, 3)
+        h, w = source_lab.shape[:2]
+        source_flat = source_lab.reshape(-1, 3)
+        reference_flat = reference_lab.reshape(-1, 3)
+
+        # Apply correlation-preserving transform
+        result_flat = ColorTransfer._apply_monge_kantorovich_transform(
+            source_flat, reference_flat
+        )
+
+        # Reshape back
+        result_lab = result_flat.reshape(h, w, 3)
+
+        # Convert back to RGB
+        result_rgb_norm = color.lab2rgb(result_lab)
+        return np.clip(result_rgb_norm * 255, 0, 255).astype(np.uint8)
+
+    @staticmethod
+    def _match_correlation_preserving_rgb(
+        source: np.ndarray,
+        reference: np.ndarray
+    ) -> np.ndarray:
+        """Match RGB with correlation preservation."""
+        # Reshape to (n_pixels, 3)
+        h, w = source.shape[:2]
+        source_flat = source.reshape(-1, 3).astype(np.float64)
+        reference_flat = reference.reshape(-1, 3).astype(np.float64)
+
+        # Apply correlation-preserving transform
+        result_flat = ColorTransfer._apply_monge_kantorovich_transform(
+            source_flat, reference_flat
+        )
+
+        # Reshape back and clip
+        result = result_flat.reshape(h, w, 3)
+        return np.clip(result, 0, 255).astype(np.uint8)
+
+    @staticmethod
+    def _match_correlation_preserving_hsv(
+        source: np.ndarray,
+        reference: np.ndarray
+    ) -> np.ndarray:
+        """Match HSV with correlation preservation."""
+        import cv2
+
+        source_hsv = cv2.cvtColor(source, cv2.COLOR_RGB2HSV).astype(np.float64)
+        reference_hsv = cv2.cvtColor(reference, cv2.COLOR_RGB2HSV).astype(np.float64)
+
+        h, w = source_hsv.shape[:2]
+        source_flat = source_hsv.reshape(-1, 3)
+        reference_flat = reference_hsv.reshape(-1, 3)
+
+        result_flat = ColorTransfer._apply_monge_kantorovich_transform(
+            source_flat, reference_flat
+        )
+
+        result_hsv = result_flat.reshape(h, w, 3)
+
+        # Clip to valid ranges
+        result_hsv[:, :, 0] = np.clip(result_hsv[:, :, 0], 0, 180)
+        result_hsv[:, :, 1] = np.clip(result_hsv[:, :, 1], 0, 255)
+        result_hsv[:, :, 2] = np.clip(result_hsv[:, :, 2], 0, 255)
+
+        result_hsv = result_hsv.astype(np.uint8)
+        result_rgb = cv2.cvtColor(result_hsv, cv2.COLOR_HSV2RGB)
+
+        return result_rgb
+
+    @staticmethod
+    def _match_correlation_preserving_hcl(
+        source: np.ndarray,
+        reference: np.ndarray
+    ) -> np.ndarray:
+        """Match HCL with correlation preservation."""
+        source_norm = source / 255.0
+        reference_norm = reference / 255.0
+
+        source_lab = color.rgb2lab(source_norm)
+        reference_lab = color.rgb2lab(reference_norm)
+
+        source_lch = color.lab2lch(source_lab)
+        reference_lch = color.lab2lch(reference_lab)
+
+        h, w = source_lch.shape[:2]
+        source_flat = source_lch.reshape(-1, 3)
+        reference_flat = reference_lch.reshape(-1, 3)
+
+        result_flat = ColorTransfer._apply_monge_kantorovich_transform(
+            source_flat, reference_flat
+        )
+
+        result_lch = result_flat.reshape(h, w, 3)
+
+        # Clip to valid ranges
+        result_lch[:, :, 0] = np.clip(result_lch[:, :, 0], 0, 100)
+        result_lch[:, :, 1] = np.maximum(result_lch[:, :, 1], 0)
+        result_lch[:, :, 2] = result_lch[:, :, 2] % (2 * np.pi)
+
+        result_lab = color.lch2lab(result_lch)
+        result_rgb_norm = color.lab2rgb(result_lab)
+        return np.clip(result_rgb_norm * 255, 0, 255).astype(np.uint8)
+
+    @staticmethod
+    def _match_correlation_preserving_xyz(
+        source: np.ndarray,
+        reference: np.ndarray
+    ) -> np.ndarray:
+        """Match XYZ with correlation preservation."""
+        source_norm = source / 255.0
+        reference_norm = reference / 255.0
+
+        source_xyz = color.rgb2xyz(source_norm)
+        reference_xyz = color.rgb2xyz(reference_norm)
+
+        h, w = source_xyz.shape[:2]
+        source_flat = source_xyz.reshape(-1, 3)
+        reference_flat = reference_xyz.reshape(-1, 3)
+
+        result_flat = ColorTransfer._apply_monge_kantorovich_transform(
+            source_flat, reference_flat
+        )
+
+        result_xyz = result_flat.reshape(h, w, 3)
+        result_xyz = np.maximum(result_xyz, 0)
+
+        result_rgb_norm = color.xyz2rgb(result_xyz)
+        return np.clip(result_rgb_norm * 255, 0, 255).astype(np.uint8)
+
+    @staticmethod
+    def _match_correlation_preserving_luv(
+        source: np.ndarray,
+        reference: np.ndarray
+    ) -> np.ndarray:
+        """Match LUV with correlation preservation."""
+        source_norm = source / 255.0
+        reference_norm = reference / 255.0
+
+        source_luv = color.rgb2luv(source_norm)
+        reference_luv = color.rgb2luv(reference_norm)
+
+        h, w = source_luv.shape[:2]
+        source_flat = source_luv.reshape(-1, 3)
+        reference_flat = reference_luv.reshape(-1, 3)
+
+        result_flat = ColorTransfer._apply_monge_kantorovich_transform(
+            source_flat, reference_flat
+        )
+
+        result_luv = result_flat.reshape(h, w, 3)
+
+        result_rgb_norm = color.luv2rgb(result_luv)
+        return np.clip(result_rgb_norm * 255, 0, 255).astype(np.uint8)
+
+    @staticmethod
+    def _match_correlation_preserving_ycbcr(
+        source: np.ndarray,
+        reference: np.ndarray
+    ) -> np.ndarray:
+        """Match YCbCr with correlation preservation."""
+        import cv2
+
+        source_ycrcb = cv2.cvtColor(source, cv2.COLOR_RGB2YCrCb).astype(np.float64)
+        reference_ycrcb = cv2.cvtColor(reference, cv2.COLOR_RGB2YCrCb).astype(np.float64)
+
+        h, w = source_ycrcb.shape[:2]
+        source_flat = source_ycrcb.reshape(-1, 3)
+        reference_flat = reference_ycrcb.reshape(-1, 3)
+
+        result_flat = ColorTransfer._apply_monge_kantorovich_transform(
+            source_flat, reference_flat
+        )
+
+        result_ycrcb = result_flat.reshape(h, w, 3)
+        result_ycrcb = np.clip(result_ycrcb, 0, 255).astype(np.uint8)
+
+        result_rgb = cv2.cvtColor(result_ycrcb, cv2.COLOR_YCrCb2RGB)
+        return result_rgb
+    @staticmethod
     def _match_histograms_rgb(
         source: np.ndarray,
         reference: np.ndarray
@@ -406,6 +702,7 @@ class ColorTransfer:
         result_rgb = cv2.cvtColor(result_ycrcb, cv2.COLOR_YCrCb2RGB)
 
         return result_rgb
+
 
     @staticmethod
     def match_statistics(

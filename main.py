@@ -150,8 +150,8 @@ def main():
             with col1:
                 method = st.radio(
                     "Select color transfer method:",
-                    ["Histogram Matching", "Statistics Matching"],
-                    help="Histogram: Matches individual pixel value distributions\nStatistics: Matches mean and standard deviation"
+                    ["Histogram Matching", "Statistics Matching", "Correlation Preserving"],
+                    help="Histogram: Matches distributions (subtle)\nStatistics: Matches mean/std (aggressive)\nCorrelation Preserving: Preserves relationships between color channels (natural)"
                 )
 
             with col2:
@@ -171,8 +171,14 @@ def main():
                         reference_img,
                         colorspace=colorspace.lower()
                     )
-                else:  # Statistics Matching
+                elif method == "Statistics Matching":
                     transferred = ColorTransfer.match_statistics(
+                        source_img,
+                        reference_img,
+                        colorspace=colorspace.lower()
+                    )
+                else:  # Correlation Preserving
+                    transferred = ColorTransfer.match_correlation_preserving(
                         source_img,
                         reference_img,
                         colorspace=colorspace.lower()
