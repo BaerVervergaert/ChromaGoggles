@@ -1,15 +1,23 @@
 # ArtAnalyzer 🎨
 
-A comprehensive, modular Python-based image analysis tool that visualizes color information across multiple color spaces with a clean, extensible architecture.
+A comprehensive, modular Python-based image analysis tool that visualizes color information across multiple color spaces and transfers colors between images with a clean, extensible architecture.
 
 ## ✨ Features
 
-### Core Capabilities
+### Color Analysis
 - **7 Color Spaces**: RGB, HSV, LAB, HCL (CIELCh), XYZ, LUV, YCbCr
 - **Channel Decomposition**: View individual color channels with appropriate colormaps
 - **Statistical Analysis**: Histograms, KDE plots, and descriptive statistics for each channel
 - **Scatter Plots**: Visualize relationships between color channels with density-based transparency
 - **Interactive Web Interface**: Built with Streamlit for easy image upload and exploration
+
+### 🎨 Color Transfer (NEW!)
+- **Histogram Matching**: Transform one image to match another's color distribution
+- **Statistics Matching**: Match mean and standard deviation of color channels
+- **Multiple Color Spaces**: LAB (perceptually uniform), RGB, HSV
+- **Blending Control**: Fine-tune the transfer effect with alpha blending
+- **Visual Analysis**: Before/after comparisons, histogram analysis, color difference metrics
+- **Download Results**: Save transferred images in high quality
 
 ### Color Spaces
 - **RGB**: Red, Green, Blue - direct pixel values
@@ -21,10 +29,11 @@ A comprehensive, modular Python-based image analysis tool that visualizes color 
 - **YCbCr**: Luma and chroma (used in JPEG/MPEG)
 
 ### Architecture Highlights
-- **Modular Design**: Easy to extend with new color spaces
+- **Modular Design**: Easy to extend with new color spaces and features
 - **Plugin System**: Color spaces self-register automatically
 - **Reusable Components**: Visualization strategies work with any color space
 - **Type-Safe**: Full type hints for better IDE support
+- **Well-Documented**: Comprehensive guides and examples
 
 ## Installation
 
