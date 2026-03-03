@@ -1,20 +1,30 @@
 # ArtAnalyzer 🎨
 
-A comprehensive Python-based image analysis tool that visualizes color information across multiple color spaces, including RGB channel decomposition, Hue-Chroma-Luminance analysis, and statistical distributions.
+A comprehensive, modular Python-based image analysis tool that visualizes color information across multiple color spaces with a clean, extensible architecture.
 
-## Features
+## ✨ Features
 
-- **RGB Channel Analysis**: View individual red, green, and blue channels in both grayscale and colored representations
-- **Statistical Distributions**: Interactive histograms and kernel density estimation (KDE) plots for each color channel
-- **HCL Analysis**: Extract and visualize Hue, Chroma, and Luminance values using the CIELCh color space
-- **Multiple Color Spaces**: 
-  - HSV (Hue, Saturation, Value)
-  - LAB (CIELAB color space)
-  - YCbCr (Luma and chroma components)
-  - LUV (CIELUV color space)
-  - XYZ (CIE 1931 color space)
+### Core Capabilities
+- **7 Color Spaces**: RGB, HSV, LAB, HCL (CIELCh), XYZ, LUV, YCbCr
+- **Channel Decomposition**: View individual color channels with appropriate colormaps
+- **Statistical Analysis**: Histograms, KDE plots, and descriptive statistics for each channel
+- **Scatter Plots**: Visualize relationships between color channels with density-based transparency
 - **Interactive Web Interface**: Built with Streamlit for easy image upload and exploration
-- **Comprehensive Visualizations**: Side-by-side comparisons and detailed statistical metrics
+
+### Color Spaces
+- **RGB**: Red, Green, Blue - direct pixel values
+- **HSV**: Hue, Saturation, Value - intuitive color representation
+- **LAB**: L\*a\*b\* - perceptually uniform color space
+- **HCL (LCh)**: Hue, Chroma, Luminance - cylindrical LAB with custom colormap
+- **XYZ**: CIE 1931 tristimulus values
+- **LUV**: L\*u\*v\* - alternative perceptually uniform space
+- **YCbCr**: Luma and chroma (used in JPEG/MPEG)
+
+### Architecture Highlights
+- **Modular Design**: Easy to extend with new color spaces
+- **Plugin System**: Color spaces self-register automatically
+- **Reusable Components**: Visualization strategies work with any color space
+- **Type-Safe**: Full type hints for better IDE support
 
 ## Installation
 
@@ -63,44 +73,215 @@ This will open a browser window with the ArtAnalyzer interface.
 ### Using the Interface
 
 1. **Upload an Image**: Click the "Browse files" button to upload an image (PNG, JPG, JPEG, BMP, or TIFF)
-2. **Explore Tabs**: Navigate through the different analysis tabs:
-   - **RGB Channels**: View color channel decomposition
-   - **RGB Statistics**: See histograms and statistics for each RGB channel
-   - **Hue-Chroma-Luminance**: Visualize HCL color space representation
-   - **HCL Statistics**: View distribution plots and metrics for HCL values
-   - **Color Spaces**: Compare different color space representations
-   - **Advanced Analysis**: Explore LUV, XYZ, and grayscale conversions
+2. **Explore Tabs**: Navigate through automatically generated tabs for each color space:
+   - Each color space has a channel visualization tab
+   - Color spaces with statistics also have a statistics tab with:
+     - Histograms and KDE density plots
+     - Scatter plots showing channel relationships
+     - Descriptive statistics (mean, std, min, max, median)
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 ArtAnalyzer/
-├── main.py                 # Streamlit web application
-├── image_processor.py      # Image analysis and color space conversion
-├── visualizer.py           # Plotting and visualization functions
-├── pyproject.toml          # Poetry configuration and dependencies
-├── poetry.lock             # Locked dependency versions
-└── README.md               # This file
+├── artanalyzer/                   # Main package
+│   ├── core/                      # Core abstractions
+│   │   ├── color_space.py         # ColorSpace base class
+│   │   ├── registry.py            # ColorSpaceRegistry
+│   │   └── statistics.py          # StatisticsCalculator
+│   ├── colorspaces/               # Color space implementations
+│   │   ├── rgb.py                 # RGB color space
+│   │   ├── hsv.py                 # HSV color space
+│   │   ├── lab.py                 # LAB color space
+│   │   ├── hcl.py                 # HCL (LCh) color space
+│   │   ├── xyz.py                 # XYZ color space
+│   │   ├── luv.py                 # LUV color space
+│   │   └── ycbcr.py               # YCbCr color space
+│   ├── visualizations/            # Visualization strategies
+│   │   ├── base.py                # VisualizationStrategy base
+│   │   ├── channels.py            # Channel comparison viz
+│   │   ├── density.py             # Density plot viz
+│   │   ├── scatter.py             # Scatter plot viz
+│   │   └── colormaps.py           # Custom colormaps (LCh hue)
+│   └── ui/                        # UI components
+│       └── tab_factory.py         # Dynamic tab generation
+├── main.py                        # Streamlit application (96 lines!)
+├── image_processor.py             # Legacy (preserved for reference)
+├── visualizer.py                  # Legacy (preserved for reference)
+├── test_refactored.py             # Comprehensive test suite
+├── pyproject.toml                 # Poetry configuration
+└── README.md                      # This file
 ```
 
-## Modules
+## 🏗️ Architecture
 
-### image_processor.py
+### ColorSpace Abstraction
 
-The `ImageAnalyzer` class provides methods for:
-- Loading and processing images
-- Extracting RGB channels
-- Converting to various color spaces (HSV, LAB, YCbCr, LUV, XYZ)
-- Computing Hue, Chroma, and Luminance values
+Each color space is a self-contained class that inherits from `ColorSpace`:
 
-### visualizer.py
+```python
+@ColorSpaceRegistry.register
+class RGBColorSpace(ColorSpace):
+    @property
+    def name(self) -> str: ...
+    
+    @property
+    def channels_metadata(self) -> list[ChannelMetadata]: ...
+    
+    def convert_from_rgb(self, rgb_image: np.ndarray) -> np.ndarray: ...
+```
 
-Functions for creating matplotlib figures:
-- `create_channel_comparison()`: RGB channel visualization
-- `create_hcl_comparison()`: HCL value visualization
-- `create_density_plots()`: Statistical distribution plots
-- `create_colorspace_comparison()`: Multi-space comparison
-- And more...
+Benefits:
+- **Self-documenting**: Metadata describes each channel
+- **Automatic UI**: Tabs generate automatically
+- **Reusable**: Visualizations work with any ColorSpace
+
+### Visualization Strategies
+
+Visualization strategies work generically with any ColorSpace:
+
+```python
+viz = ChannelComparisonViz()
+fig = viz.create(colorspace, rgb_image)
+```
+
+Strategies:
+- `ChannelComparisonViz`: Side-by-side channel display
+- `DensityPlotViz`: Histograms and KDE plots
+- `ScatterPlotViz`: Channel relationships with RGB coloring
+
+### Registry Pattern
+
+Color spaces self-register using a decorator:
+
+```python
+@ColorSpaceRegistry.register
+class MyColorSpace(ColorSpace):
+    # ... implementation ...
+```
+
+No manual tracking needed - the UI discovers them automatically!
+
+## 🎓 Key Components
+
+### Core Module (`artanalyzer/core/`)
+
+**ColorSpace Base Class**
+- Abstract base for all color space implementations
+- Defines conversion interface and metadata structure
+- Provides default implementations for common operations
+
+**ColorSpaceRegistry**
+- Manages registration of color spaces
+- Enables automatic discovery
+- Supports filtering (e.g., get all with statistics)
+
+**StatisticsCalculator**
+- Computes descriptive statistics for channels
+- Formats results as markdown tables
+- Works with any ColorSpace
+
+### Color Spaces (`artanalyzer/colorspaces/`)
+
+Each file implements a complete color space:
+- Metadata (name, display name, description)
+- Channel information (ranges, colormaps)
+- Conversion from RGB
+- Optional: custom behaviors
+
+### Visualizations (`artanalyzer/visualizations/`)
+
+**ChannelComparisonViz**
+- Displays channels side-by-side
+- Uses metadata-defined colormaps
+- Automatic scaling to correct ranges
+
+**DensityPlotViz**
+- Creates histograms for each channel
+- Adds KDE (Kernel Density Estimation) plots
+- Handles edge cases gracefully
+
+**ScatterPlotViz**
+- Shows relationships between channels
+- Colors points by original RGB values
+- Uses density-based alpha for overplotting
+
+**Custom Colormaps**
+- LCh hue colormap (perceptually accurate)
+- Easily extensible for new colormaps
+
+## 🚀 Extending ArtAnalyzer
+
+### Adding a New Color Space
+
+Create a new file in `artanalyzer/colorspaces/`:
+
+```python
+from artanalyzer.core.color_space import ColorSpace, ChannelMetadata
+from artanalyzer.core.registry import ColorSpaceRegistry
+import numpy as np
+
+@ColorSpaceRegistry.register
+class MyColorSpace(ColorSpace):
+    @property
+    def name(self) -> str:
+        return "myspace"
+    
+    @property
+    def display_name(self) -> str:
+        return "My Color Space"
+    
+    @property
+    def description(self) -> str:
+        return "Description of your color space..."
+    
+    @property
+    def channels_metadata(self) -> list[ChannelMetadata]:
+        return [
+            ChannelMetadata(
+                name="channel1",
+                display_name="Channel 1",
+                range_min=0,
+                range_max=100,
+                colormap="viridis",
+                description="First channel"
+            ),
+            # ... more channels ...
+        ]
+    
+    def convert_from_rgb(self, rgb_image: np.ndarray) -> np.ndarray:
+        # Your conversion logic here
+        pass
+```
+
+Then import it in `artanalyzer/colorspaces/__init__.py`:
+```python
+from artanalyzer.colorspaces.myspace import MyColorSpace
+```
+
+That's it! The UI will automatically generate tabs for your color space.
+
+### Adding a New Visualization
+
+Create a strategy class in `artanalyzer/visualizations/`:
+
+```python
+from artanalyzer.visualizations.base import VisualizationStrategy
+import matplotlib.pyplot as plt
+
+class MyViz(VisualizationStrategy):
+    def create(self, colorspace, rgb_image, **kwargs):
+        # Create your visualization
+        fig, ax = plt.subplots()
+        # ... your plotting code ...
+        return fig
+```
+
+Use it in the TabFactory or anywhere else:
+```python
+viz = MyViz()
+fig = viz.create(colorspace, image)
+```
 
 ## Color Spaces Explained
 
@@ -140,21 +321,38 @@ After uploading an image, you can:
 - Examine brightness distribution with luminance plots
 - Compare the same image across different color space representations
 
-## Development
+## 🧪 Testing
 
-### Adding New Features
+Run the comprehensive test suite:
 
-To add new analysis features:
+```bash
+python test_refactored.py example_gradient.png
+```
 
-1. Add processing methods to `ImageAnalyzer` class in `image_processor.py`
-2. Create visualization functions in `visualizer.py`
-3. Update the Streamlit interface in `main.py` to display new analyses
+This tests:
+- All color space conversions
+- All visualizations
+- Statistics calculations
+- Error handling
 
-### Running Tests
+## 📊 Performance
 
-(To be implemented)
+The refactored architecture:
+- Maintains same performance as original
+- Enables future caching optimizations
+- Reduces memory by eliminating duplicate code
+- More efficient imports (load only what you need)
 
-## Dependencies
+## 🔄 Migration from v0.1
+
+The old files are preserved as backups:
+- `main_old.py` (original main.py)
+- `image_processor.py` (still functional)
+- `visualizer.py` (still functional)
+
+New code uses the `artanalyzer` package exclusively.
+
+## Contributing
 
 - **numpy**: Numerical operations on image arrays
 - **pillow**: Image loading and basic manipulation
