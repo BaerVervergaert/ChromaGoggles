@@ -45,7 +45,7 @@ def main():
         # File uploader for analysis
         uploaded_file = st.file_uploader(
             "Choose an image file for analysis",
-            type=['png', 'jpg', 'jpeg', 'bmp', 'tiff'],
+            type=['png', 'jpg', 'jpeg', 'bmp', 'tiff', 'webp'],
             key='analysis_uploader'
         )
 
@@ -88,7 +88,7 @@ def main():
             - **Advanced Visualizations**: Scatter plots, density plots, and histograms for all color spaces
             
             ### Supported formats:
-            PNG, JPG, JPEG, BMP, TIFF
+            PNG, JPG, JPEG, BMP, TIFF, WebP
             """)
 
     # ==================== COLOR TRANSFER TAB ====================
@@ -107,7 +107,7 @@ def main():
             st.caption("Image to be transformed")
             source_file = st.file_uploader(
                 "Upload source image",
-                type=['png', 'jpg', 'jpeg', 'bmp', 'tiff'],
+                type=['png', 'jpg', 'jpeg', 'bmp', 'tiff', 'webp'],
                 key='source_uploader'
             )
 
@@ -116,7 +116,7 @@ def main():
             st.caption("Image providing the color palette")
             reference_file = st.file_uploader(
                 "Upload reference image",
-                type=['png', 'jpg', 'jpeg', 'bmp', 'tiff'],
+                type=['png', 'jpg', 'jpeg', 'bmp', 'tiff', 'webp'],
                 key='reference_uploader'
             )
 

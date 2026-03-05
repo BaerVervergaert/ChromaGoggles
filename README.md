@@ -81,7 +81,7 @@ This will open a browser window with the ArtAnalyzer interface.
 
 ### Using the Interface
 
-1. **Upload an Image**: Click the "Browse files" button to upload an image (PNG, JPG, JPEG, BMP, or TIFF)
+1. **Upload an Image**: Click the "Browse files" button to upload an image (PNG, JPG, JPEG, BMP, TIFF, or WebP)
 2. **Explore Tabs**: Navigate through automatically generated tabs for each color space:
    - Each color space has a channel visualization tab
    - Color spaces with statistics also have a statistics tab with:
