@@ -1,12 +1,12 @@
 """
-Test script for the refactored ArtAnalyzer.
+Test script for the refactored ChromaGoggles.
 """
 import numpy as np
 from PIL import Image
-from artanalyzer.core.registry import ColorSpaceRegistry
-from artanalyzer.visualizations import ChannelComparisonViz, DensityPlotViz, ScatterPlotViz
-from artanalyzer.core.statistics import StatisticsCalculator
-import artanalyzer.colorspaces  # Register all color spaces
+from chromagoggles.core.registry import ColorSpaceRegistry
+from chromagoggles.visualizations import ChannelComparisonViz, DensityPlotViz, ScatterPlotViz
+from chromagoggles.core.statistics import StatisticsCalculator
+import chromagoggles.colorspaces  # Register all color spaces
 
 def test_with_image(image_path):
     """Test all functionality with a real image."""
@@ -78,4 +78,3 @@ if __name__ == '__main__':
         else:
             print("Please provide an image path as argument")
             print("Usage: python test_refactored.py <image_path>")
-

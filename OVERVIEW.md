@@ -1,4 +1,4 @@
-# 🎨 ArtAnalyzer - Complete Project Overview
+# 🎨 ChromaGoggles - Complete Project Overview
 
 ## ✅ Project Status: COMPLETE AND WORKING
 
@@ -22,7 +22,7 @@ You requested a Python application to analyze images and present:
 
 ### Installation (One-Time Setup)
 ```bash
-cd /home/baer/Documents/GitHub/ArtAnalyzer
+cd /home/baer/Documents/GitHub/ChromaGoggles
 poetry install
 ```
 
@@ -111,7 +111,7 @@ poetry run python test_basic.py
 
 Output:
 ```
-=== Running ArtAnalyzer Tests ===
+=== Running ChromaGoggles Tests ===
 ✓ Image properties work correctly
 ✓ RGB channel extraction works correctly
 ✓ HCL extraction works correctly
@@ -172,7 +172,7 @@ All installed via Poetry:
 ## 🗂️ Project Structure
 
 ```
-ArtAnalyzer/
+ChromaGoggles/
 ├── 📄 main.py                  # Main Streamlit application
 ├── 📄 image_processor.py       # Core image analysis
 ├── 📄 visualizer.py            # Visualization functions
@@ -343,11 +343,11 @@ See PROJECT_SUMMARY.md for ideas:
 
 ## 🎉 Congratulations!
 
-Your ArtAnalyzer application is complete and ready to use!
+Your ChromaGoggles application is complete and ready to use!
 
 Run it now:
 ```bash
-cd /home/baer/Documents/GitHub/ArtAnalyzer
+cd /home/baer/Documents/GitHub/ChromaGoggles
 ./run.sh
 ```
 

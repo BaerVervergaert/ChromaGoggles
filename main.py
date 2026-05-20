@@ -1,5 +1,5 @@
 """
-ArtAnalyzer - Image Color Space Analysis Tool (Refactored)
+ChromaGoggles - Image Color Space Analysis Tool (Refactored)
 
 A comprehensive image analysis application that visualizes color space
 transformations and statistical distributions using a modular architecture.
@@ -10,26 +10,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Import the new modular components
-from artanalyzer.ui import TabFactory
-from artanalyzer.core import ColorTransfer
-from artanalyzer.visualizations import (
+from chromagoggles.ui import TabFactory
+from chromagoggles.core import ColorTransfer
+from chromagoggles.visualizations import (
     create_color_transfer_comparison,
     create_histogram_comparison,
     create_statistics_table,
     create_difference_visualization,
 )
 # Import all color spaces to trigger registration
-import artanalyzer.colorspaces  # noqa: F401
+import chromagoggles.colorspaces  # noqa: F401
 
 
 def main():
     st.set_page_config(
-        page_title="ArtAnalyzer",
+        page_title="ChromaGoggles",
         page_icon="🎨",
         layout="wide"
     )
 
-    st.title("🎨 ArtAnalyzer - Image Color Space Analysis")
+    st.title("🎨 ChromaGoggles - Image Color Space Analysis")
     st.markdown("""
     Upload an image to analyze its color properties across different color spaces,
     or use the color transfer feature to match the colors of one image to another.

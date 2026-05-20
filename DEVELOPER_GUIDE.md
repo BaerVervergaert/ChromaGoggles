@@ -1,6 +1,6 @@
-# Developer Guide - ArtAnalyzer
+# Developer Guide - ChromaGoggles
 
-This guide explains how to work with the refactored ArtAnalyzer architecture.
+This guide explains how to work with the refactored ChromaGoggles architecture.
 
 ## 📚 Table of Contents
 
@@ -58,15 +58,15 @@ Streamlit displays figure
 
 ### Step 1: Create the File
 
-Create `artanalyzer/colorspaces/your_space.py`:
+Create `chromagoggles/colorspaces/your_space.py`:
 
 ```python
 """
 Your color space implementation.
 """
 import numpy as np
-from artanalyzer.core.color_space import ColorSpace, ChannelMetadata
-from artanalyzer.core.registry import ColorSpaceRegistry
+from chromagoggles.core.color_space import ColorSpace, ChannelMetadata
+from chromagoggles.core.registry import ColorSpaceRegistry
 
 
 @ColorSpaceRegistry.register
@@ -144,10 +144,10 @@ class YourColorSpace(ColorSpace):
 
 ### Step 2: Register in __init__.py
 
-Add to `artanalyzer/colorspaces/__init__.py`:
+Add to `chromagoggles/colorspaces/__init__.py`:
 
 ```python
-from artanalyzer.colorspaces.your_space import YourColorSpace
+from chromagoggles.colorspaces.your_space import YourColorSpace
 
 __all__ = [
     # ... existing ...
@@ -158,7 +158,7 @@ __all__ = [
 ### Step 3: Test
 
 ```python
-from artanalyzer.colorspaces import YourColorSpace
+from chromagoggles.colorspaces import YourColorSpace
 import numpy as np
 
 # Create test image
@@ -182,7 +182,7 @@ That's it! Your color space will now appear in the UI automatically.
 
 ### Step 1: Create Strategy Class
 
-Create `artanalyzer/visualizations/my_viz.py`:
+Create `chromagoggles/visualizations/my_viz.py`:
 
 ```python
 """
@@ -190,8 +190,8 @@ My custom visualization strategy.
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from artanalyzer.visualizations.base import VisualizationStrategy
-from artanalyzer.core.color_space import ColorSpace
+from chromagoggles.visualizations.base import VisualizationStrategy
+from chromagoggles.core.color_space import ColorSpace
 
 
 class MyViz(VisualizationStrategy):
@@ -233,7 +233,7 @@ class MyViz(VisualizationStrategy):
 ### Step 2: Use in TabFactory or Elsewhere
 
 ```python
-from artanalyzer.visualizations.my_viz import MyViz
+from chromagoggles.visualizations.my_viz import MyViz
 
 viz = MyViz()
 fig = viz.create(colorspace, rgb_image)
@@ -254,7 +254,7 @@ plt.close(fig)
 
 ### Adding a Tab Section
 
-Edit `artanalyzer/ui/tab_factory.py`:
+Edit `chromagoggles/ui/tab_factory.py`:
 
 ```python
 @staticmethod
@@ -305,7 +305,7 @@ Test individual components:
 ```python
 # test_colorspaces.py
 def test_rgb_conversion():
-    from artanalyzer.colorspaces import RGBColorSpace
+    from chromagoggles.colorspaces import RGBColorSpace
     import numpy as np
     
     cs = RGBColorSpace()
@@ -323,9 +323,9 @@ Test full workflow:
 ```python
 # test_integration.py
 def test_full_workflow():
-    from artanalyzer.core.registry import ColorSpaceRegistry
-    from artanalyzer.visualizations import ChannelComparisonViz
-    import artanalyzer.colorspaces
+    from chromagoggles.core.registry import ColorSpaceRegistry
+    from chromagoggles.visualizations import ChannelComparisonViz
+    import chromagoggles.colorspaces
     import numpy as np
     
     # Create test image
@@ -388,7 +388,7 @@ python test_refactored.py example_gradient.png
 ### Getting Color Space Data
 
 ```python
-from artanalyzer.core.registry import ColorSpaceRegistry
+from chromagoggles.core.registry import ColorSpaceRegistry
 
 # Get by name
 rgb = ColorSpaceRegistry.get("rgb")
@@ -417,7 +417,7 @@ for channel, meta in zip(channels, colorspace.channels_metadata):
 ### Creating Visualizations
 
 ```python
-from artanalyzer.visualizations import ChannelComparisonViz
+from chromagoggles.visualizations import ChannelComparisonViz
 import matplotlib.pyplot as plt
 
 viz = ChannelComparisonViz()
@@ -440,7 +440,7 @@ plt.close(fig)
 ### ColorSpace not appearing in UI
 
 - Check that `@ColorSpaceRegistry.register` decorator is present
-- Verify import in `artanalyzer/colorspaces/__init__.py`
+- Verify import in `chromagoggles/colorspaces/__init__.py`
 - Ensure no syntax errors in the file
 
 ### Visualization not working
@@ -461,10 +461,10 @@ plt.close(fig)
 
 ### Key Files to Reference
 
-- `artanalyzer/core/color_space.py` - ColorSpace base class
-- `artanalyzer/colorspaces/rgb.py` - Simplest example
-- `artanalyzer/colorspaces/hcl.py` - Complex example with custom colormap
-- `artanalyzer/visualizations/scatter.py` - Advanced visualization
+- `chromagoggles/core/color_space.py` - ColorSpace base class
+- `chromagoggles/colorspaces/rgb.py` - Simplest example
+- `chromagoggles/colorspaces/hcl.py` - Complex example with custom colormap
+- `chromagoggles/visualizations/scatter.py` - Advanced visualization
 
 ### External Resources
 

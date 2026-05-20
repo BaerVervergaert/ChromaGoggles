@@ -1,4 +1,4 @@
-# ArtAnalyzer 🎨
+# ChromaGoggles 🎨
 
 A comprehensive, modular Python-based image analysis tool that visualizes color information across multiple color spaces and transfers colors between images with a clean, extensible architecture.
 
@@ -52,7 +52,7 @@ This project uses Poetry for dependency management. Follow these steps to set up
 1. Clone this repository:
 ```bash
 git clone <your-repo-url>
-cd ArtAnalyzer
+cd ChromaGoggles
 ```
 
 2. Install dependencies using Poetry:
@@ -81,7 +81,7 @@ To start the web-based interface:
 poetry run streamlit run main.py
 ```
 
-This will open a browser window with the ArtAnalyzer interface.
+This will open a browser window with the ChromaGoggles interface.
 
 ### Using the Interface
 
@@ -96,8 +96,8 @@ This will open a browser window with the ArtAnalyzer interface.
 ## 📁 Project Structure
 
 ```
-ArtAnalyzer/
-├── artanalyzer/                   # Main package
+ChromaGoggles/
+├── chromagoggles/                   # Main package
 │   ├── core/                      # Core abstractions
 │   │   ├── color_space.py         # ColorSpace base class
 │   │   ├── registry.py            # ColorSpaceRegistry
@@ -180,7 +180,7 @@ No manual tracking needed - the UI discovers them automatically!
 
 ## 🎓 Key Components
 
-### Core Module (`artanalyzer/core/`)
+### Core Module (`chromagoggles/core/`)
 
 **ColorSpace Base Class**
 - Abstract base for all color space implementations
@@ -197,7 +197,7 @@ No manual tracking needed - the UI discovers them automatically!
 - Formats results as markdown tables
 - Works with any ColorSpace
 
-### Color Spaces (`artanalyzer/colorspaces/`)
+### Color Spaces (`chromagoggles/colorspaces/`)
 
 Each file implements a complete color space:
 - Metadata (name, display name, description)
@@ -205,7 +205,7 @@ Each file implements a complete color space:
 - Conversion from RGB
 - Optional: custom behaviors
 
-### Visualizations (`artanalyzer/visualizations/`)
+### Visualizations (`chromagoggles/visualizations/`)
 
 **ChannelComparisonViz**
 - Displays channels side-by-side
@@ -226,15 +226,15 @@ Each file implements a complete color space:
 - LCh hue colormap (perceptually accurate)
 - Easily extensible for new colormaps
 
-## 🚀 Extending ArtAnalyzer
+## 🚀 Extending ChromaGoggles
 
 ### Adding a New Color Space
 
-Create a new file in `artanalyzer/colorspaces/`:
+Create a new file in `chromagoggles/colorspaces/`:
 
 ```python
-from artanalyzer.core.color_space import ColorSpace, ChannelMetadata
-from artanalyzer.core.registry import ColorSpaceRegistry
+from chromagoggles.core.color_space import ColorSpace, ChannelMetadata
+from chromagoggles.core.registry import ColorSpaceRegistry
 import numpy as np
 
 @ColorSpaceRegistry.register
@@ -270,19 +270,19 @@ class MyColorSpace(ColorSpace):
         pass
 ```
 
-Then import it in `artanalyzer/colorspaces/__init__.py`:
+Then import it in `chromagoggles/colorspaces/__init__.py`:
 ```python
-from artanalyzer.colorspaces.myspace import MyColorSpace
+from chromagoggles.colorspaces.myspace import MyColorSpace
 ```
 
 That's it! The UI will automatically generate tabs for your color space.
 
 ### Adding a New Visualization
 
-Create a strategy class in `artanalyzer/visualizations/`:
+Create a strategy class in `chromagoggles/visualizations/`:
 
 ```python
-from artanalyzer.visualizations.base import VisualizationStrategy
+from chromagoggles.visualizations.base import VisualizationStrategy
 import matplotlib.pyplot as plt
 
 class MyViz(VisualizationStrategy):
@@ -371,7 +371,7 @@ The old files are preserved as backups:
 - `image_processor.py` (still functional)
 - `visualizer.py` (still functional)
 
-New code uses the `artanalyzer` package exclusively.
+New code uses the `chromagoggles` package exclusively.
 
 ## Contributing
 

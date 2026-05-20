@@ -96,8 +96,8 @@ def test_image_properties():
     print("✓ Image properties work correctly")
 
 if __name__ == "__main__":
-    print("\n=== Running ArtAnalyzer Tests ===\n")
-    
+    print("\n=== Running ChromaGoggles Tests ===\n")
+
     try:
         test_image_properties()
         test_rgb_channels()
@@ -116,4 +116,3 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n✗ Error: {e}")
         exit(1)
-

@@ -1,7 +1,7 @@
-# Project Summary: ArtAnalyzer
+# Project Summary: ChromaGoggles
 
 ## Overview
-ArtAnalyzer is a comprehensive Python-based image analysis tool that provides deep insights into the color composition of images. Built with Streamlit for an interactive web interface, it visualizes color information across multiple color spaces and provides statistical analysis.
+ChromaGoggles is a comprehensive Python-based image analysis tool that provides deep insights into the color composition of images. Built with Streamlit for an interactive web interface, it visualizes color information across multiple color spaces and provides statistical analysis.
 
 ## What Was Built
 
@@ -120,7 +120,7 @@ ArtAnalyzer is a comprehensive Python-based image analysis tool that provides de
 
 ### Installation
 ```bash
-cd /home/baer/Documents/GitHub/ArtAnalyzer
+cd /home/baer/Documents/GitHub/ChromaGoggles
 poetry install
 ```
 
@@ -144,7 +144,7 @@ poetry run python test_basic.py
 
 ## Project Structure
 ```
-ArtAnalyzer/
+ChromaGoggles/
 ├── main.py                 # Streamlit web application (259 lines)
 ├── image_processor.py      # Image analysis core (155 lines)
 ├── visualizer.py           # Visualization functions (250 lines)
@@ -200,5 +200,5 @@ Future features you could add:
 
 ## Conclusion
 
-The ArtAnalyzer project is complete and fully functional. All requested features have been implemented with a clean, modular architecture and comprehensive visualization capabilities. The application is ready to analyze images and provide detailed color space information.
+The ChromaGoggles project is complete and fully functional. All requested features have been implemented with a clean, modular architecture and comprehensive visualization capabilities. The application is ready to analyze images and provide detailed color space information.
 

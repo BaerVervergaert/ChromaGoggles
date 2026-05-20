@@ -1,4 +1,4 @@
-# IDE Configuration for ArtAnalyzer
+# IDE Configuration for ChromaGoggles
 
 ## Overview
 Your IDE (PyCharm/JetBrains) may show import errors because it's not configured to use the Poetry virtual environment. The code itself is correct and works (all tests pass), but the IDE needs to be pointed to the right Python interpreter.
@@ -8,18 +8,18 @@ Your IDE (PyCharm/JetBrains) may show import errors because it's not configured 
 Run this command to find the Python interpreter path:
 
 ```bash
-cd /home/baer/Documents/GitHub/ArtAnalyzer
+cd /home/baer/Documents/GitHub/ChromaGoggles
 poetry env info --path
 ```
 
 This will output something like:
 ```
-/home/baer/.cache/pypoetry/virtualenvs/artanalyzer-XXXXXXX-py3.13
+/home/baer/.cache/pypoetry/virtualenvs/chromagoggles-XXXXXXX-py3.13
 ```
 
 The actual Python executable will be at:
 ```
-/home/baer/.cache/pypoetry/virtualenvs/artanalyzer-XXXXXXX-py3.13/bin/python
+/home/baer/.cache/pypoetry/virtualenvs/chromagoggles-XXXXXXX-py3.13/bin/python
 ```
 
 ## Configuring PyCharm/JetBrains IDE
@@ -32,7 +32,7 @@ The actual Python executable will be at:
 
 ### Method 2: Manual Configuration
 1. Open **Settings/Preferences** (Ctrl+Alt+S on Linux)
-2. Navigate to **Project: ArtAnalyzer** → **Python Interpreter**
+2. Navigate to **Project: ChromaGoggles** → **Python Interpreter**
 3. Click the gear icon ⚙️ → **Add...**
 4. Select **Poetry Environment**
 5. PyCharm will detect the existing environment
@@ -40,7 +40,7 @@ The actual Python executable will be at:
 
 ### Method 3: Direct Path Configuration
 1. Open **Settings/Preferences** (Ctrl+Alt+S on Linux)
-2. Navigate to **Project: ArtAnalyzer** → **Python Interpreter**
+2. Navigate to **Project: ChromaGoggles** → **Python Interpreter**
 3. Click the gear icon ⚙️ → **Add...**
 4. Select **Existing Environment**
 5. Browse to the path from `poetry env info --path` + `/bin/python`
@@ -78,7 +78,7 @@ poetry run streamlit run main.py
 Verify all packages are available:
 
 ```bash
-cd /home/baer/Documents/GitHub/ArtAnalyzer
+cd /home/baer/Documents/GitHub/ChromaGoggles
 poetry run python -c "import numpy, cv2, PIL, skimage, matplotlib, seaborn, streamlit; print('All imports successful!')"
 ```
 
@@ -96,7 +96,7 @@ If this prints "All imports successful!" then everything is installed correctly 
 To verify everything works without IDE configuration:
 
 ```bash
-cd /home/baer/Documents/GitHub/ArtAnalyzer
+cd /home/baer/Documents/GitHub/ChromaGoggles
 poetry run python test_basic.py
 ```
 

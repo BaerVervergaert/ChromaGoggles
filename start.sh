@@ -1,7 +1,7 @@
 #!/bin/bash
-# Quick start script for ArtAnalyzer
+# Quick start script for ChromaGoggles
 
-echo "🎨 ArtAnalyzer - Starting application..."
+echo "🎨 ChromaGoggles - Starting application..."
 echo ""
 echo "This will launch the Streamlit web interface."
 echo "Press Ctrl+C to stop the application."
@@ -14,6 +14,6 @@ if ! command -v streamlit &> /dev/null; then
 fi
 
 # Run the application
-echo "🚀 Launching ArtAnalyzer..."
+echo "🚀 Launching ChromaGoggles..."
 poetry run streamlit run main.py
 

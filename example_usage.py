@@ -1,5 +1,5 @@
 """
-Example script demonstrating programmatic use of ArtAnalyzer modules.
+Example script demonstrating programmatic use of ChromaGoggles modules.
 This shows how to use the modules without the Streamlit interface.
 """
 import numpy as np
@@ -139,7 +139,7 @@ def create_example_image():
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("ArtAnalyzer - Programmatic Example")
+    print("ChromaGoggles - Programmatic Example")
     print("=" * 60)
     print()
 
@@ -159,4 +159,3 @@ if __name__ == "__main__":
     print("Or use the interactive web interface:")
     print("  ./run.sh")
     print("=" * 60)
-

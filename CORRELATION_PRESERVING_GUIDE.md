@@ -400,7 +400,7 @@ Possible improvements:
 ### Basic Usage
 
 ```python
-from artanalyzer.core import ColorTransfer
+from chromagoggles.core import ColorTransfer
 import numpy as np
 from PIL import Image
 

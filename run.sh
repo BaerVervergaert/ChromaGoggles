@@ -1,6 +1,6 @@
 #!/bin/bash
-# Run the ArtAnalyzer application
+# Run the ChromaGoggles application
 
-echo "Starting ArtAnalyzer..."
+echo "Starting ChromaGoggles..."
 poetry run streamlit run main.py
 

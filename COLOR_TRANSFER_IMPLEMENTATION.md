@@ -2,11 +2,11 @@
 
 ## Overview
 
-Added a **Color Transfer** feature to ArtAnalyzer that allows users to transform the colors of one image to match the color distribution of another image.
+Added a **Color Transfer** feature to ChromaGoggles that allows users to transform the colors of one image to match the color distribution of another image.
 
 ## What Was Implemented
 
-### 1. Core Module: `artanalyzer/core/color_transfer.py`
+### 1. Core Module: `chromagoggles/core/color_transfer.py`
 
 **Main Class: `ColorTransfer`**
 
@@ -32,7 +32,7 @@ Added a **Color Transfer** feature to ArtAnalyzer that allows users to transform
 - Computes RGB and LAB statistics differences
 - Returns dictionary with mean and std differences
 
-### 2. Visualization Module: `artanalyzer/visualizations/color_transfer_viz.py`
+### 2. Visualization Module: `chromagoggles/visualizations/color_transfer_viz.py`
 
 **Functions:**
 
@@ -84,7 +84,7 @@ Comprehensive guide including:
 ## File Structure
 
 ```
-artanalyzer/
+chromagoggles/
 ├── core/
 │   └── color_transfer.py          (NEW - 400 lines)
 └── visualizations/
@@ -170,7 +170,7 @@ All tests pass successfully:
 
 ### Example 1: Transfer Warm to Cool
 ```python
-from artanalyzer.core import ColorTransfer
+from chromagoggles.core import ColorTransfer
 import numpy as np
 
 warm_image = np.array(Image.open('warm.jpg'))
@@ -308,4 +308,3 @@ The implementation follows best practices and maintains consistency with the exi
 ---
 
 *Completed: March 3, 2026*
-
