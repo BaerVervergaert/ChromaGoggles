@@ -4,6 +4,7 @@ Custom colormap utilities for color space visualizations.
 import numpy as np
 import matplotlib.colors as mcolors
 from skimage import color
+from artanalyzer.colorspaces.oklab_utils import oklch_to_oklab, oklab_to_rgb
 
 
 # Cache for custom colormaps
@@ -57,6 +58,28 @@ def create_lch_hue_colormap():
     return cmap
 
 
+def create_oklch_hue_colormap():
+    """Create a custom colormap for Oklch hue angles."""
+    if 'oklch_hue' in _colormap_cache:
+        return _colormap_cache['oklch_hue']
+
+    n_colors = 360
+    hue_angles = np.linspace(0, 360, n_colors)
+
+    # Use middle lightness/high chroma to show vivid hue variations.
+    oklch = np.zeros((n_colors, 1, 3), dtype=np.float64)
+    oklch[:, 0, 0] = 0.72
+    oklch[:, 0, 1] = 0.18
+    oklch[:, 0, 2] = hue_angles
+
+    oklab = oklch_to_oklab(oklch)
+    rgb = oklab_to_rgb(oklab).reshape(n_colors, 3).astype(np.float64) / 255.0
+
+    cmap = mcolors.ListedColormap(np.clip(rgb, 0, 1))
+    _colormap_cache['oklch_hue'] = cmap
+    return cmap
+
+
 def get_colormap(colormap_name: str):
     """
     Get a colormap by name, including custom colormaps.
@@ -70,6 +93,8 @@ def get_colormap(colormap_name: str):
     # Check if it's a custom colormap
     if colormap_name == 'lch_hue':
         return create_lch_hue_colormap()
+    if colormap_name == 'oklch_hue':
+        return create_oklch_hue_colormap()
 
     # Otherwise, use matplotlib's built-in colormaps
     try:
@@ -80,4 +105,3 @@ def get_colormap(colormap_name: str):
         print(f"Warning: Colormap '{colormap_name}' not found, using 'viridis'")
         import matplotlib.pyplot as plt
         return plt.get_cmap('viridis')
-

@@ -6,6 +6,12 @@ distribution of image B (reference image).
 """
 import numpy as np
 from skimage import color
+from artanalyzer.colorspaces.oklab_utils import (
+    rgb_to_oklab,
+    oklab_to_rgb,
+    oklab_to_oklch,
+    oklch_to_oklab,
+)
 
 
 class ColorTransfer:
@@ -38,6 +44,8 @@ class ColorTransfer:
             'lab': ColorTransfer._match_histograms_lab,
             'hsv': ColorTransfer._match_histograms_hsv,
             'hcl': ColorTransfer._match_histograms_hcl,
+            'oklab': ColorTransfer._match_histograms_oklab,
+            'oklch': ColorTransfer._match_histograms_oklch,
             'xyz': ColorTransfer._match_histograms_xyz,
             'luv': ColorTransfer._match_histograms_luv,
             'ycbcr': ColorTransfer._match_histograms_ycbcr,
@@ -78,6 +86,8 @@ class ColorTransfer:
             'rgb': ColorTransfer._match_correlation_preserving_rgb,
             'hsv': ColorTransfer._match_correlation_preserving_hsv,
             'hcl': ColorTransfer._match_correlation_preserving_hcl,
+            'oklab': ColorTransfer._match_correlation_preserving_oklab,
+            'oklch': ColorTransfer._match_correlation_preserving_oklch,
             'xyz': ColorTransfer._match_correlation_preserving_xyz,
             'luv': ColorTransfer._match_correlation_preserving_luv,
             'ycbcr': ColorTransfer._match_correlation_preserving_ycbcr,
@@ -268,6 +278,53 @@ class ColorTransfer:
         result_lab = color.lch2lab(result_lch)
         result_rgb_norm = color.lab2rgb(result_lab)
         return np.clip(result_rgb_norm * 255, 0, 255).astype(np.uint8)
+
+    @staticmethod
+    def _match_correlation_preserving_oklab(
+        source: np.ndarray,
+        reference: np.ndarray
+    ) -> np.ndarray:
+        """Match Oklab with correlation preservation."""
+        source_oklab = rgb_to_oklab(source)
+        reference_oklab = rgb_to_oklab(reference)
+
+        h, w = source_oklab.shape[:2]
+        source_flat = source_oklab.reshape(-1, 3)
+        reference_flat = reference_oklab.reshape(-1, 3)
+
+        result_flat = ColorTransfer._apply_monge_kantorovich_transform(
+            source_flat, reference_flat
+        )
+        result_oklab = result_flat.reshape(h, w, 3)
+
+        result_oklab[:, :, 0] = np.clip(result_oklab[:, :, 0], 0.0, 1.0)
+        result_oklab[:, :, 1:] = np.clip(result_oklab[:, :, 1:], -0.5, 0.5)
+        return oklab_to_rgb(result_oklab)
+
+    @staticmethod
+    def _match_correlation_preserving_oklch(
+        source: np.ndarray,
+        reference: np.ndarray
+    ) -> np.ndarray:
+        """Match Oklch with correlation preservation."""
+        source_oklch = oklab_to_oklch(rgb_to_oklab(source))
+        reference_oklch = oklab_to_oklch(rgb_to_oklab(reference))
+
+        h, w = source_oklch.shape[:2]
+        source_flat = source_oklch.reshape(-1, 3)
+        reference_flat = reference_oklch.reshape(-1, 3)
+
+        result_flat = ColorTransfer._apply_monge_kantorovich_transform(
+            source_flat, reference_flat
+        )
+        result_oklch = result_flat.reshape(h, w, 3)
+
+        result_oklch[:, :, 0] = np.clip(result_oklch[:, :, 0], 0.0, 1.0)
+        result_oklch[:, :, 1] = np.clip(result_oklch[:, :, 1], 0.0, 0.5)
+        result_oklch[:, :, 2] = result_oklch[:, :, 2] % 360.0
+
+        result_oklab = oklch_to_oklab(result_oklch)
+        return oklab_to_rgb(result_oklab)
 
     @staticmethod
     def _match_correlation_preserving_xyz(
@@ -566,6 +623,80 @@ class ColorTransfer:
         return np.clip(result_rgb_norm * 255, 0, 255).astype(np.uint8)
 
     @staticmethod
+    def _match_histograms_oklab(
+        source: np.ndarray,
+        reference: np.ndarray
+    ) -> np.ndarray:
+        """Match histograms in Oklab color space."""
+        source_oklab = rgb_to_oklab(source)
+        reference_oklab = rgb_to_oklab(reference)
+        result_oklab = source_oklab.copy()
+
+        oklab_ranges = [(0.0, 1.0), (-0.5, 0.5), (-0.5, 0.5)]
+
+        for i, (min_val, max_val) in enumerate(oklab_ranges):
+            source_channel = ((source_oklab[:, :, i] - min_val) / (max_val - min_val) * 255).astype(np.uint8)
+            reference_channel = ((reference_oklab[:, :, i] - min_val) / (max_val - min_val) * 255).astype(np.uint8)
+
+            source_hist, _ = np.histogram(source_channel.flatten(), bins=256, range=(0, 256))
+            reference_hist, _ = np.histogram(reference_channel.flatten(), bins=256, range=(0, 256))
+
+            source_cdf = np.cumsum(source_hist) / (source_hist.sum() + 1e-10)
+            reference_cdf = np.cumsum(reference_hist) / (reference_hist.sum() + 1e-10)
+
+            mapping = np.zeros(256, dtype=np.uint8)
+            for j in range(256):
+                idx = np.argmin(np.abs(reference_cdf - source_cdf[j]))
+                mapping[j] = idx
+
+            mapped_channel = mapping[source_channel]
+            result_oklab[:, :, i] = (mapped_channel / 255.0 * (max_val - min_val) + min_val)
+
+        result_oklab[:, :, 0] = np.clip(result_oklab[:, :, 0], 0.0, 1.0)
+        result_oklab[:, :, 1:] = np.clip(result_oklab[:, :, 1:], -0.5, 0.5)
+        return oklab_to_rgb(result_oklab)
+
+    @staticmethod
+    def _match_histograms_oklch(
+        source: np.ndarray,
+        reference: np.ndarray
+    ) -> np.ndarray:
+        """Match histograms in Oklch color space."""
+        source_oklch = oklab_to_oklch(rgb_to_oklab(source))
+        reference_oklch = oklab_to_oklch(rgb_to_oklab(reference))
+        result_oklch = source_oklch.copy()
+
+        oklch_ranges = [(0.0, 1.0), (0.0, 0.5), (0.0, 360.0)]
+
+        for i, (min_val, max_val) in enumerate(oklch_ranges):
+            source_channel = source_oklch[:, :, i]
+            reference_channel = reference_oklch[:, :, i]
+
+            source_norm_ch = ((source_channel - min_val) / (max_val - min_val) * 255).astype(np.uint8)
+            reference_norm_ch = ((reference_channel - min_val) / (max_val - min_val) * 255).astype(np.uint8)
+
+            source_hist, _ = np.histogram(source_norm_ch.flatten(), bins=256, range=(0, 256))
+            reference_hist, _ = np.histogram(reference_norm_ch.flatten(), bins=256, range=(0, 256))
+
+            source_cdf = np.cumsum(source_hist) / (source_hist.sum() + 1e-10)
+            reference_cdf = np.cumsum(reference_hist) / (reference_hist.sum() + 1e-10)
+
+            mapping = np.zeros(256, dtype=np.uint8)
+            for j in range(256):
+                idx = np.argmin(np.abs(reference_cdf - source_cdf[j]))
+                mapping[j] = idx
+
+            mapped_channel = mapping[source_norm_ch]
+            result_oklch[:, :, i] = (mapped_channel / 255.0 * (max_val - min_val) + min_val)
+
+        result_oklch[:, :, 0] = np.clip(result_oklch[:, :, 0], 0.0, 1.0)
+        result_oklch[:, :, 1] = np.clip(result_oklch[:, :, 1], 0.0, 0.5)
+        result_oklch[:, :, 2] = result_oklch[:, :, 2] % 360.0
+
+        result_oklab = oklch_to_oklab(result_oklch)
+        return oklab_to_rgb(result_oklab)
+
+    @staticmethod
     def _match_histograms_xyz(
         source: np.ndarray,
         reference: np.ndarray
@@ -728,6 +859,8 @@ class ColorTransfer:
             'rgb': ColorTransfer._match_statistics_rgb,
             'hsv': ColorTransfer._match_statistics_hsv,
             'hcl': ColorTransfer._match_statistics_hcl,
+            'oklab': ColorTransfer._match_statistics_oklab,
+            'oklch': ColorTransfer._match_statistics_oklch,
             'xyz': ColorTransfer._match_statistics_xyz,
             'luv': ColorTransfer._match_statistics_luv,
             'ycbcr': ColorTransfer._match_statistics_ycbcr,
@@ -877,6 +1010,61 @@ class ColorTransfer:
         result_lab = color.lch2lab(result_lch)
         result_rgb_norm = color.lab2rgb(result_lab)
         return np.clip(result_rgb_norm * 255, 0, 255).astype(np.uint8)
+
+    @staticmethod
+    def _match_statistics_oklab(
+        source: np.ndarray,
+        reference: np.ndarray
+    ) -> np.ndarray:
+        """Match Oklab statistics (mean and std)."""
+        source_oklab = rgb_to_oklab(source)
+        reference_oklab = rgb_to_oklab(reference)
+        result_oklab = source_oklab.copy()
+
+        for i in range(3):
+            source_mean = source_oklab[:, :, i].mean()
+            source_std = source_oklab[:, :, i].std()
+            reference_mean = reference_oklab[:, :, i].mean()
+            reference_std = reference_oklab[:, :, i].std()
+
+            if source_std < 1e-6:
+                source_std = 1e-6
+
+            result_oklab[:, :, i] = ((source_oklab[:, :, i] - source_mean) /
+                                     source_std * reference_std + reference_mean)
+
+        result_oklab[:, :, 0] = np.clip(result_oklab[:, :, 0], 0.0, 1.0)
+        result_oklab[:, :, 1:] = np.clip(result_oklab[:, :, 1:], -0.5, 0.5)
+        return oklab_to_rgb(result_oklab)
+
+    @staticmethod
+    def _match_statistics_oklch(
+        source: np.ndarray,
+        reference: np.ndarray
+    ) -> np.ndarray:
+        """Match Oklch statistics (mean and std)."""
+        source_oklch = oklab_to_oklch(rgb_to_oklab(source))
+        reference_oklch = oklab_to_oklch(rgb_to_oklab(reference))
+        result_oklch = source_oklch.copy()
+
+        for i in range(3):
+            source_mean = source_oklch[:, :, i].mean()
+            source_std = source_oklch[:, :, i].std()
+            reference_mean = reference_oklch[:, :, i].mean()
+            reference_std = reference_oklch[:, :, i].std()
+
+            if source_std < 1e-6:
+                source_std = 1e-6
+
+            result_oklch[:, :, i] = ((source_oklch[:, :, i] - source_mean) /
+                                     source_std * reference_std + reference_mean)
+
+        result_oklch[:, :, 0] = np.clip(result_oklch[:, :, 0], 0.0, 1.0)
+        result_oklch[:, :, 1] = np.clip(result_oklch[:, :, 1], 0.0, 0.5)
+        result_oklch[:, :, 2] = result_oklch[:, :, 2] % 360.0
+
+        result_oklab = oklch_to_oklab(result_oklch)
+        return oklab_to_rgb(result_oklab)
 
     @staticmethod
     def _match_statistics_xyz(
@@ -1113,6 +1301,16 @@ class ColorTransfer:
             l = lch[:, :, 0] / 100.0
             c = lch[:, :, 1] / 150.0
             h = lch[:, :, 2]
+            return np.stack([np.cos(h) * c, np.sin(h) * c, l], axis=-1).astype(np.float32)
+
+        if colorspace == 'oklab':
+            return rgb_to_oklab(image_rgb).astype(np.float32)
+
+        if colorspace == 'oklch':
+            oklch = oklab_to_oklch(rgb_to_oklab(image_rgb)).astype(np.float32)
+            l = oklch[:, :, 0]
+            c = oklch[:, :, 1] / 0.5
+            h = np.radians(oklch[:, :, 2])
             return np.stack([np.cos(h) * c, np.sin(h) * c, l], axis=-1).astype(np.float32)
 
         if colorspace == 'xyz':

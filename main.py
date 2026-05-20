@@ -82,6 +82,9 @@ def main():
             - **HSV Analysis**: Hue, Saturation, and Value decomposition with statistical distributions
             - **LAB Analysis**: CIELAB color space with L*, A*, and B* channels and scatter plots
             - **HCL Analysis**: Hue, Chroma, and Luminance (LCh) perceptually uniform color space
+            - **Oklab Analysis**: Modern perceptual lightness-opponent space (L, a, b)
+            - **Oklch Analysis**: Cylindrical Oklab space (L, C, H) with custom hue colormap
+            - **LMS Analysis**: Cone-response space (L, M, S) approximating human vision
             - **XYZ Analysis**: CIE XYZ tristimulus color space
             - **LUV Analysis**: CIELUV perceptually uniform color space
             - **YCbCr Analysis**: Color space used in video and image compression
@@ -167,8 +170,8 @@ def main():
             with col2:
                 colorspace = st.selectbox(
                     "Color space:",
-                    ["LAB", "RGB", "HSV", "HCL", "XYZ", "LUV", "YCbCr"],
-                    help="LAB and HCL are perceptually uniform and usually give best results"
+                    ["LAB", "RGB", "HSV", "HCL", "Oklab", "Oklch", "XYZ", "LUV", "YCbCr"],
+                    help="LAB, HCL, Oklab and Oklch are perceptually oriented and often give strong results"
                 )
 
             # Extra control for nearest-pixel method to balance quality/performance.
@@ -314,13 +317,14 @@ def main():
             
             - **LAB**: Perceptually uniform, excellent for color matching (recommended)
             - **HCL**: Perceptually uniform cylindrical color space, great for hue/chroma aware matching
+            - **Oklab / Oklch**: Modern perceptual spaces with strong hue and lightness behavior
             - **RGB**: Simple channel-wise matching, may produce color casts
             - **HSV**: Separates hue, saturation, and value for intuitive color control
             - **XYZ / LUV / YCbCr**: Useful for technical workflows and alternative transfer behavior
             
             ### Tips:
             
-            - LAB or HCL usually gives the best perceptual results
+            - LAB, HCL, Oklab, or Oklch usually gives the best perceptual results
             - Use histogram matching for subtle, natural-looking results
             - Use statistics matching for aggressive color transformation
             - Use correlation preserving when gradients and natural color relationships matter

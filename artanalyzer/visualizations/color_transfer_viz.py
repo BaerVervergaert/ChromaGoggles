@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from artanalyzer.core.color_transfer import ColorTransfer
 from skimage import color
+from artanalyzer.colorspaces.oklab_utils import rgb_to_oklab, oklab_to_oklch
 
 
 def create_color_transfer_comparison(
@@ -67,6 +68,8 @@ def create_histogram_comparison(
         'lab': _create_lab_histogram_comparison,
         'hsv': _create_hsv_histogram_comparison,
         'hcl': _create_hcl_histogram_comparison,
+        'oklab': _create_oklab_histogram_comparison,
+        'oklch': _create_oklch_histogram_comparison,
         'xyz': _create_xyz_histogram_comparison,
         'luv': _create_luv_histogram_comparison,
         'ycbcr': _create_ycbcr_histogram_comparison,
@@ -269,6 +272,78 @@ def _create_xyz_histogram_comparison(
         ax.set_xlim(0, 1)
 
     fig.suptitle('XYZ Histogram Comparison', fontsize=14, fontweight='bold')
+    plt.tight_layout()
+    return fig
+
+
+def _create_oklab_histogram_comparison(
+    source: np.ndarray,
+    reference: np.ndarray,
+    transferred: np.ndarray
+) -> plt.Figure:
+    """Create Oklab histogram comparison."""
+    source_oklab = rgb_to_oklab(source)
+    reference_oklab = rgb_to_oklab(reference)
+    transferred_oklab = rgb_to_oklab(transferred)
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+
+    channel_names = ['L (Lightness)', 'a (Green-Red)', 'b (Blue-Yellow)']
+    channel_ranges = [(0.0, 1.0), (-0.4, 0.4), (-0.4, 0.4)]
+
+    for i, (ax, channel_name, (min_val, max_val)) in enumerate(
+        zip(axes, channel_names, channel_ranges)
+    ):
+        ax.hist(source_oklab[:, :, i].flatten(), bins=50, alpha=0.5, density=True,
+               label='Source', color='blue')
+        ax.hist(reference_oklab[:, :, i].flatten(), bins=50, alpha=0.5, density=True,
+               label='Reference', color='gray', linestyle='--')
+        ax.hist(transferred_oklab[:, :, i].flatten(), bins=50, alpha=0.5, density=True,
+               label='Transferred', color='orange')
+
+        ax.set_title(channel_name)
+        ax.set_xlabel('Channel Value')
+        ax.set_ylabel('Density')
+        ax.legend()
+        ax.set_xlim(min_val, max_val)
+
+    fig.suptitle('Oklab Histogram Comparison', fontsize=14, fontweight='bold')
+    plt.tight_layout()
+    return fig
+
+
+def _create_oklch_histogram_comparison(
+    source: np.ndarray,
+    reference: np.ndarray,
+    transferred: np.ndarray
+) -> plt.Figure:
+    """Create Oklch histogram comparison."""
+    source_oklch = oklab_to_oklch(rgb_to_oklab(source))
+    reference_oklch = oklab_to_oklch(rgb_to_oklab(reference))
+    transferred_oklch = oklab_to_oklch(rgb_to_oklab(transferred))
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+
+    channel_names = ['L (Lightness)', 'C (Chroma)', 'H (Hue)']
+    channel_ranges = [(0.0, 1.0), (0.0, 0.4), (0.0, 360.0)]
+
+    for i, (ax, channel_name, (min_val, max_val)) in enumerate(
+        zip(axes, channel_names, channel_ranges)
+    ):
+        ax.hist(source_oklch[:, :, i].flatten(), bins=50, alpha=0.5, density=True,
+               label='Source', color='blue')
+        ax.hist(reference_oklch[:, :, i].flatten(), bins=50, alpha=0.5, density=True,
+               label='Reference', color='gray', linestyle='--')
+        ax.hist(transferred_oklch[:, :, i].flatten(), bins=50, alpha=0.5, density=True,
+               label='Transferred', color='orange')
+
+        ax.set_title(channel_name)
+        ax.set_xlabel('Channel Value')
+        ax.set_ylabel('Density')
+        ax.legend()
+        ax.set_xlim(min_val, max_val)
+
+    fig.suptitle('Oklch Histogram Comparison', fontsize=14, fontweight='bold')
     plt.tight_layout()
     return fig
 

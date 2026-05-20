@@ -1,5 +1,5 @@
 """
-Tab factory for dynamically generating Streamlit tabs.
+Dropdown-based factory for displaying color space analyses.
 """
 import streamlit as st
 import matplotlib.pyplot as plt
@@ -14,59 +14,45 @@ from artanalyzer.visualizations import (
 
 class TabFactory:
     """
-    Factory for creating Streamlit tabs dynamically from registered color spaces.
-
-    This eliminates the need for repetitive tab creation code in main.py.
+    Factory for displaying color space analyses via a dropdown selector.
     """
 
     @staticmethod
     def create_all_tabs(rgb_image):
         """
-        Create all tabs for registered color spaces.
+        Render a dropdown and show the selected color space's full analysis.
 
         Args:
             rgb_image: Original RGB image array with shape (height, width, 3)
         """
-        # Get color spaces that support statistics
-        colorspaces_with_stats = ColorSpaceRegistry.get_with_statistics()
+        colorspaces = ColorSpaceRegistry.get_all()
 
-        # Create tab names
-        tab_names = []
-        for cs in colorspaces_with_stats:
-            tab_names.append(cs.display_name)
-            if cs.supports_statistics_tab():
-                tab_names.append(f"{cs.display_name} Statistics")
+        # Build display name -> ColorSpace mapping (preserving registration order)
+        cs_map = {cs.display_name: cs for cs in colorspaces}
+        display_names = list(cs_map.keys())
 
-        # Create tabs
-        tabs = st.tabs(tab_names)
+        selected_name = st.selectbox(
+            "Select color space to analyze:",
+            display_names,
+            key="colorspace_selector",
+        )
 
-        # Populate tabs
-        tab_idx = 0
-        for cs in colorspaces_with_stats:
-            # Channel visualization tab
-            with tabs[tab_idx]:
-                TabFactory._create_channel_tab(cs, rgb_image)
-            tab_idx += 1
+        cs = cs_map[selected_name]
 
-            # Statistics tab
-            if cs.supports_statistics_tab():
-                with tabs[tab_idx]:
-                    TabFactory._create_statistics_tab(cs, rgb_image)
-                tab_idx += 1
+        # Channel images
+        TabFactory._create_channel_tab(cs, rgb_image)
+
+        # Statistics (density + scatter + table)
+        if cs.supports_statistics_tab():
+            st.divider()
+            TabFactory._create_statistics_tab(cs, rgb_image)
 
     @staticmethod
     def _create_channel_tab(colorspace, rgb_image):
-        """
-        Create a channel visualization tab.
-
-        Args:
-            colorspace: ColorSpace instance
-            rgb_image: Original RGB image array
-        """
+        """Render channel images for a color space."""
         st.header(colorspace.display_name)
         st.markdown(colorspace.description)
 
-        # Create channel visualization
         viz = ChannelComparisonViz()
         fig = viz.create(colorspace, rgb_image)
         st.pyplot(fig)
@@ -74,13 +60,7 @@ class TabFactory:
 
     @staticmethod
     def _create_statistics_tab(colorspace, rgb_image):
-        """
-        Create a statistics tab with density plots, scatter plots, and statistics.
-
-        Args:
-            colorspace: ColorSpace instance
-            rgb_image: Original RGB image array
-        """
+        """Render density plots, scatter plots, and statistics table."""
         st.header(f"{colorspace.display_name} Statistics")
 
         # Density plots
@@ -108,4 +88,3 @@ class TabFactory:
         stats = StatisticsCalculator.calculate(colorspace, rgb_image)
         stats_table = StatisticsCalculator.format_stats_table(stats)
         st.markdown(stats_table)
-

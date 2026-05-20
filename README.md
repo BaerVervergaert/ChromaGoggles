@@ -5,7 +5,7 @@ A comprehensive, modular Python-based image analysis tool that visualizes color 
 ## ✨ Features
 
 ### Color Analysis
-- **7 Color Spaces**: RGB, HSV, LAB, HCL (CIELCh), XYZ, LUV, YCbCr
+- **10 Color Spaces**: RGB, HSV, LAB, HCL (CIELCh), Oklab, Oklch, LMS, XYZ, LUV, YCbCr
 - **Channel Decomposition**: View individual color channels with appropriate colormaps
 - **Statistical Analysis**: Histograms, KDE plots, and descriptive statistics for each channel
 - **Scatter Plots**: Visualize relationships between color channels with density-based transparency
@@ -24,6 +24,9 @@ A comprehensive, modular Python-based image analysis tool that visualizes color 
 - **HSV**: Hue, Saturation, Value - intuitive color representation
 - **LAB**: L\*a\*b\* - perceptually uniform color space
 - **HCL (LCh)**: Hue, Chroma, Luminance - cylindrical LAB with custom colormap
+- **Oklab**: Modern perceptual lightness-opponent color space
+- **Oklch**: Cylindrical Oklab with Lightness, Chroma, and Hue
+- **LMS**: Long, Medium, Short cone-response space
 - **XYZ**: CIE 1931 tristimulus values
 - **LUV**: L\*u\*v\* - alternative perceptually uniform space
 - **YCbCr**: Luma and chroma (used in JPEG/MPEG)
@@ -59,6 +62,7 @@ poetry install
 
 This will create a virtual environment and install all required packages including:
 - numpy
+- colour-science
 - pillow
 - opencv-python
 - matplotlib
@@ -103,6 +107,9 @@ ArtAnalyzer/
 │   │   ├── hsv.py                 # HSV color space
 │   │   ├── lab.py                 # LAB color space
 │   │   ├── hcl.py                 # HCL (LCh) color space
+│   │   ├── oklab.py               # Oklab color space
+│   │   ├── oklch.py               # Oklch color space
+│   │   ├── lms.py                 # LMS color space
 │   │   ├── xyz.py                 # XYZ color space
 │   │   ├── luv.py                 # LUV color space
 │   │   └── ycbcr.py               # YCbCr color space
@@ -315,6 +322,11 @@ A perceptually uniform color space:
 - **A***: Green to Red axis
 - **B***: Blue to Yellow axis
 
+### Oklab / Oklch
+Modern perceptual spaces designed for robust image manipulation:
+- **Oklab**: Cartesian channels `L`, `a`, `b`
+- **Oklch**: Cylindrical channels `L`, `C`, `H`
+
 ### YCbCr
 Used in video compression:
 - **Y**: Luma (brightness)
@@ -364,6 +376,7 @@ New code uses the `artanalyzer` package exclusively.
 ## Contributing
 
 - **numpy**: Numerical operations on image arrays
+- **colour-science**: Oklab and Oklch color encoding conversions
 - **pillow**: Image loading and basic manipulation
 - **opencv-python**: Advanced image processing and color space conversions
 - **matplotlib**: Creating plots and visualizations
