@@ -30,10 +30,10 @@ class LABColorSpace(ColorSpace):
     @property
     def description(self) -> str:
         return (
-            "**CIELAB (L\*a\*b\*)** is a perceptually uniform color space designed "
-            "to approximate human vision. L\* represents lightness (0-100), a\* "
+            "**CIELAB (L\\*a\\*b\\*)** is a perceptually uniform color space designed "
+            "to approximate human vision. L\\* represents lightness (0-100), a\\* "
             "represents the green-red axis (negative = green, positive = red), and "
-            "b\* represents the blue-yellow axis (negative = blue, positive = yellow). "
+            "b\\* represents the blue-yellow axis (negative = blue, positive = yellow). "
             "Equal distances in LAB space correspond to roughly equal perceived color differences."
         )
 

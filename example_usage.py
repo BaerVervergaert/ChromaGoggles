@@ -49,8 +49,7 @@ def analyze_image(image_path):
     print(f"Color spaces converted")
 
     # Create visualizations
-    print("
-Creating visualizations...")
+    print("\nCreating visualizations...")
 
     # RGB channel comparison
     fig1 = create_channel_comparison(r_channel, g_channel, b_channel)
@@ -88,8 +87,7 @@ Creating visualizations...")
     print("✓ Saved: output_colorspace_comparison.png")
     plt.close(fig4)
 
-    print("
-Analysis complete! Check the output_*.png files.")
+    print("\nAnalysis complete! Check the output_*.png files.")
 
 
 def create_example_image():

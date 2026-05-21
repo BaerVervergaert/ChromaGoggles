@@ -485,8 +485,7 @@ def create_statistics_table(
             f"| {name} Mean | {source_mean:.2f} | {transferred_mean:.2f} | {reference_mean:.2f} |"
         )
 
-    return "
-".join(lines)
+    return "\n".join(lines)
 
 
 def create_difference_visualization(

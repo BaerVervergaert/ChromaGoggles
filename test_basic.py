@@ -97,9 +97,7 @@ def test_image_properties():
     print("✓ Image properties work correctly")
 
 if __name__ == "__main__":
-    print("
-=== Running ChromaGoggles Tests ===
-")
+    print("\n=== Running ChromaGoggles Tests ===\n")
 
     try:
         test_image_properties()
@@ -107,19 +105,15 @@ if __name__ == "__main__":
         test_hcl_extraction()
         test_color_spaces()
         
-        print("
-=== All tests passed! ===")
-        print("
-You can now run the application with:")
+        print("\n=== All tests passed! ===")
+        print("\nYou can now run the application with:")
         print("  ./run.sh")
         print("  or")
         print("  poetry run streamlit run main.py")
         
     except AssertionError as e:
-        print(f"
-✗ Test failed: {e}")
+        print(f"\n✗ Test failed: {e}")
         exit(1)
     except Exception as e:
-        print(f"
-✗ Error: {e}")
+        print(f"\n✗ Error: {e}")
         exit(1)

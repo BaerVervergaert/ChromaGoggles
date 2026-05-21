@@ -22,16 +22,11 @@ class ChannelStats:
     def __str__(self) -> str:
         """Format statistics for display."""
         return (
-            f"{self.display_name}:
-"
-            f"  Mean: {self.mean:.2f}
-"
-            f"  Std Dev: {self.std:.2f}
-"
-            f"  Min: {self.min:.2f}
-"
-            f"  Max: {self.max:.2f}
-"
+            f"{self.display_name}:\n"
+            f"  Mean: {self.mean:.2f}\n"
+            f"  Std Dev: {self.std:.2f}\n"
+            f"  Min: {self.min:.2f}\n"
+            f"  Max: {self.max:.2f}\n"
             f"  Median: {self.median:.2f}"
         )
 
@@ -101,5 +96,4 @@ class StatisticsCalculator:
                 f"{stat.median:.2f} |"
             )
 
-        return "
-".join(lines)
+        return "\n".join(lines)

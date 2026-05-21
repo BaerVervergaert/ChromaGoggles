@@ -23,12 +23,10 @@ def test_with_image(image_path):
 
     # Get all color spaces
     colorspaces = ColorSpaceRegistry.get_all()
-    print(f"
-Testing {len(colorspaces)} color spaces:")
+    print(f"\nTesting {len(colorspaces)} color spaces:")
 
     for cs in colorspaces:
-        print(f"
-  {cs.display_name}:")
+        print(f"\n  {cs.display_name}:")
 
         # Test conversion
         try:
@@ -67,8 +65,7 @@ Testing {len(colorspaces)} color spaces:")
             except Exception as e:
                 print(f"    ✗ Statistics failed: {e}")
 
-    print("
-🎉 All tests completed!")
+    print("\n🎉 All tests completed!")
 
 if __name__ == '__main__':
     import sys

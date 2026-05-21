@@ -161,12 +161,9 @@ def main():
                         "Nearest Reference Pixels",
                     ],
                     help=(
-                        "Histogram: Matches distributions (subtle)
-"
-                        "Statistics: Matches mean/std (aggressive)
-"
-                        "Correlation Preserving: Preserves channel relationships (natural)
-"
+                        "Histogram: Matches distributions (subtle)\n"
+                        "Statistics: Matches mean/std (aggressive)\n"
+                        "Correlation Preserving: Preserves channel relationships (natural)\n"
                         "Nearest Reference Pixels: Replaces each scaled source pixel with the closest scaled reference pixel"
                     )
                 )

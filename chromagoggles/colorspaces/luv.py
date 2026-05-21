@@ -30,9 +30,9 @@ class LUVColorSpace(ColorSpace):
     @property
     def description(self) -> str:
         return (
-            "**CIELUV (L\*u\*v\*)** is another perceptually uniform color space, "
-            "similar to LAB but with different chromatic components. L\* represents "
-            "lightness (0-100), u\* represents a green-red axis, and v\* represents "
+            "**CIELUV (L\\*u\\*v\\*)** is another perceptually uniform color space, "
+            "similar to LAB but with different chromatic components. L\\* represents "
+            "lightness (0-100), u\\* represents a green-red axis, and v\\* represents "
             "a blue-yellow axis. LUV is often preferred for applications involving "
             "additive color mixing or displays."
         )
