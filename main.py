@@ -333,6 +333,9 @@ def main():
             - Use the blend slider to fine-tune the effect intensity
             """)
 
+    st.markdown("---")
+    st.caption("Copyright (c) 2026 Baer Ververgaert. All rights reserved.")
+
 
 def _image_to_bytes(pil_image):
     """Convert PIL image to bytes for download."""
@@ -340,6 +343,12 @@ def _image_to_bytes(pil_image):
     buf = io.BytesIO()
     pil_image.save(buf, format="PNG")
     return buf.getvalue()
+
+
+def _render_copyright_notice():
+    """Show a persistent copyright notice in the sidebar."""
+    st.sidebar.markdown("---")
+    st.sidebar.caption("Copyright (c) 2026 Baer Ververgaert. All rights reserved.")
 
 
 if __name__ == '__main__':
