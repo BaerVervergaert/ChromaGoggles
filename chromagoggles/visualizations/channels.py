@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 Channel comparison visualization strategy.
 """
@@ -43,7 +44,8 @@ class ChannelComparisonViz(VisualizationStrategy):
                 vmax=meta.range_max
             )
             # Set title with range
-            ax.set_title(f'{meta.display_name}\n({meta.range_min}-{meta.range_max})')
+            ax.set_title(f'{meta.display_name}
+({meta.range_min}-{meta.range_max})')
             ax.axis('off')
             # Add colorbar
             plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)

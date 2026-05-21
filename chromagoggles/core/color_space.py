@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 Base class and abstractions for color space implementations.
 """
@@ -135,4 +136,3 @@ class ColorSpace(ABC):
             Converted image array
         """
         return self.convert_from_rgb(rgb_image)
-

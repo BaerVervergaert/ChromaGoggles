@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 HSV color space implementation.
 """
@@ -68,4 +69,3 @@ class HSVColorSpace(ColorSpace):
     def convert_from_rgb(self, rgb_image: np.ndarray) -> np.ndarray:
         """Convert RGB to HSV using OpenCV."""
         return cv2.cvtColor(rgb_image, cv2.COLOR_RGB2HSV)
-

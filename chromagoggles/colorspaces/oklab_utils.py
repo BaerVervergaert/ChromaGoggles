@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 Utilities for converting between RGB, Oklab, and Oklch color spaces.
 """
@@ -37,5 +38,3 @@ def oklch_to_oklab(oklch_image: np.ndarray) -> np.ndarray:
     Convert Oklch [L, C, H] with H in degrees to Oklab [L, a, b].
     """
     return colour.models.Oklch_to_Oklab(oklch_image.astype(np.float64))
-
-

@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 Scatter plot visualization strategy.
 """
@@ -144,4 +145,3 @@ class ScatterPlotViz(VisualizationStrategy):
 
         plt.tight_layout()
         return fig
-

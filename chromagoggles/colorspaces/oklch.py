@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """Oklch color space implementation."""
 import numpy as np
 from chromagoggles.core.color_space import ColorSpace, ChannelMetadata

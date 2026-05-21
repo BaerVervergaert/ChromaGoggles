@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 HCL (CIELCh) color space implementation.
 """
@@ -88,4 +89,3 @@ class HCLColorSpace(ColorSpace):
         hcl_image[:, :, 2] = lch_image[:, :, 0]  # L
 
         return hcl_image
-

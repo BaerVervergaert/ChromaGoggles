@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 Visualization utilities for color transfer feature.
 """
@@ -484,7 +485,8 @@ def create_statistics_table(
             f"| {name} Mean | {source_mean:.2f} | {transferred_mean:.2f} | {reference_mean:.2f} |"
         )
 
-    return "\n".join(lines)
+    return "
+".join(lines)
 
 
 def create_difference_visualization(
@@ -535,4 +537,3 @@ def create_difference_visualization(
     fig.suptitle('Color Difference Analysis', fontsize=14, fontweight='bold')
     plt.tight_layout()
     return fig
-

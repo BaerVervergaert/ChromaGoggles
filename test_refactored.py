@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 Test script for the refactored ChromaGoggles.
 """
@@ -22,10 +23,12 @@ def test_with_image(image_path):
 
     # Get all color spaces
     colorspaces = ColorSpaceRegistry.get_all()
-    print(f"\nTesting {len(colorspaces)} color spaces:")
+    print(f"
+Testing {len(colorspaces)} color spaces:")
 
     for cs in colorspaces:
-        print(f"\n  {cs.display_name}:")
+        print(f"
+  {cs.display_name}:")
 
         # Test conversion
         try:
@@ -64,7 +67,8 @@ def test_with_image(image_path):
             except Exception as e:
                 print(f"    ✗ Statistics failed: {e}")
 
-    print("\n🎉 All tests completed!")
+    print("
+🎉 All tests completed!")
 
 if __name__ == '__main__':
     import sys

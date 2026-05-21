@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 Image processing module for analyzing and extracting color information from images.
 """
@@ -144,4 +145,3 @@ class ImageAnalyzer:
         """
         gray_image = cv2.cvtColor(self.original_image, cv2.COLOR_RGB2GRAY)
         return gray_image
-

@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 Visualization module for creating plots and displays of image analysis.
 """
@@ -957,4 +958,3 @@ def create_lab_scatter_plots(lab_image, rgb_image=None):
 
     plt.tight_layout()
     return fig
-

@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """Oklab color space implementation."""
 import numpy as np
 from chromagoggles.core.color_space import ColorSpace, ChannelMetadata
@@ -32,4 +33,3 @@ class OklabColorSpace(ColorSpace):
 
     def convert_from_rgb(self, rgb_image: np.ndarray) -> np.ndarray:
         return rgb_to_oklab(rgb_image)
-

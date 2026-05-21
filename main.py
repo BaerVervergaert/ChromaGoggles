@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 ChromaGoggles - Image Color Space Analysis Tool (Refactored)
 
@@ -160,9 +161,12 @@ def main():
                         "Nearest Reference Pixels",
                     ],
                     help=(
-                        "Histogram: Matches distributions (subtle)\n"
-                        "Statistics: Matches mean/std (aggressive)\n"
-                        "Correlation Preserving: Preserves channel relationships (natural)\n"
+                        "Histogram: Matches distributions (subtle)
+"
+                        "Statistics: Matches mean/std (aggressive)
+"
+                        "Correlation Preserving: Preserves channel relationships (natural)
+"
                         "Nearest Reference Pixels: Replaces each scaled source pixel with the closest scaled reference pixel"
                     )
                 )
@@ -343,4 +347,3 @@ def _image_to_bytes(pil_image):
 
 if __name__ == '__main__':
     main()
-

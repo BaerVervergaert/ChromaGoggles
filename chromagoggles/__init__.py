@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 ChromaGoggles - A modular image color analysis toolkit.
 """

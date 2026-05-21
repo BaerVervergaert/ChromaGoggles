@@ -3,7 +3,7 @@ name = "chromagoggles"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "BaerVervergaert",email = "bgmj.ververgaert@gmail.com"}
+    {name = "Baer Ververgaert",email = "bgmj.ververgaert@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.11,<3.15"

@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 RGB color space implementation.
 """
@@ -65,4 +66,3 @@ class RGBColorSpace(ColorSpace):
     def convert_from_rgb(self, rgb_image: np.ndarray) -> np.ndarray:
         """RGB to RGB is identity transform."""
         return rgb_image.copy()
-

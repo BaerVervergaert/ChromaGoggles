@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 Simple test to verify the image processing modules work correctly.
 Run with: poetry run python test_basic.py
@@ -96,7 +97,9 @@ def test_image_properties():
     print("✓ Image properties work correctly")
 
 if __name__ == "__main__":
-    print("\n=== Running ChromaGoggles Tests ===\n")
+    print("
+=== Running ChromaGoggles Tests ===
+")
 
     try:
         test_image_properties()
@@ -104,15 +107,19 @@ if __name__ == "__main__":
         test_hcl_extraction()
         test_color_spaces()
         
-        print("\n=== All tests passed! ===")
-        print("\nYou can now run the application with:")
+        print("
+=== All tests passed! ===")
+        print("
+You can now run the application with:")
         print("  ./run.sh")
         print("  or")
         print("  poetry run streamlit run main.py")
         
     except AssertionError as e:
-        print(f"\n✗ Test failed: {e}")
+        print(f"
+✗ Test failed: {e}")
         exit(1)
     except Exception as e:
-        print(f"\n✗ Error: {e}")
+        print(f"
+✗ Error: {e}")
         exit(1)

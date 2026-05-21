@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 Base class for visualization strategies.
 """
@@ -35,4 +36,3 @@ class VisualizationStrategy(ABC):
             Matplotlib figure
         """
         pass
-

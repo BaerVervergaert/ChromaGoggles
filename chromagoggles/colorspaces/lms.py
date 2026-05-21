@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 LMS color space implementation.
 """
@@ -68,4 +69,3 @@ class LMSColorSpace(ColorSpace):
         rgb = np.clip(rgb_image.astype(np.float64) / 255.0, 0.0, 1.0)
         xyz = colour.models.RGB_to_XYZ(rgb, "sRGB", apply_cctf_decoding=True)
         return xyz @ colour.adaptation.CAT_CAT02.T
-

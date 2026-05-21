@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 Example script demonstrating programmatic use of ChromaGoggles modules.
 This shows how to use the modules without the Streamlit interface.
@@ -48,7 +49,8 @@ def analyze_image(image_path):
     print(f"Color spaces converted")
 
     # Create visualizations
-    print("\nCreating visualizations...")
+    print("
+Creating visualizations...")
 
     # RGB channel comparison
     fig1 = create_channel_comparison(r_channel, g_channel, b_channel)
@@ -86,7 +88,8 @@ def analyze_image(image_path):
     print("✓ Saved: output_colorspace_comparison.png")
     plt.close(fig4)
 
-    print("\nAnalysis complete! Check the output_*.png files.")
+    print("
+Analysis complete! Check the output_*.png files.")
 
 
 def create_example_image():

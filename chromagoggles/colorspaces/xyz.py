@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 XYZ color space implementation.
 """
@@ -68,4 +69,3 @@ class XYZColorSpace(ColorSpace):
         """Convert RGB to XYZ using scikit-image."""
         rgb_normalized = rgb_image / 255.0
         return color.rgb2xyz(rgb_normalized)
-

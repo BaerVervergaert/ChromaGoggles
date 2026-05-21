@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 Density plot visualization strategy.
 """
@@ -71,7 +72,8 @@ class DensityPlotViz(VisualizationStrategy):
             except Exception as e:
                 axes[1, i].text(
                     0.5, 0.5,
-                    f'KDE not available\n({str(e)[:30]}...)',
+                    f'KDE not available
+({str(e)[:30]}...)',
                     ha='center',
                     va='center',
                     transform=axes[1, i].transAxes
@@ -80,4 +82,3 @@ class DensityPlotViz(VisualizationStrategy):
 
         plt.tight_layout()
         return fig
-

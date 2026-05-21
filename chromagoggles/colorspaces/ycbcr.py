@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Baer Ververgaert. All rights reserved.
 """
 YCbCr color space implementation.
 """
@@ -78,4 +79,3 @@ class YCbCrColorSpace(ColorSpace):
     def supports_statistics_tab(self) -> bool:
         """YCbCr doesn't need a statistics tab in the current UI."""
         return False
-
